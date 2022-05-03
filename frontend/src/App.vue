@@ -1,7 +1,11 @@
 <template>
   <div class="flex flex-col w-screen h-screen bg-gray-900">
-    <header class="text-white bg-gray-700 flex justify-between">
-      <div class="flex items-center px-4 font-extrabold text-3xl">AIS</div>
+    <header class="text-white bg-gray-600 flex justify-between">
+      <div
+        class="flex items-center px-4 font-extrabold text-3xl cursor-default"
+      >
+        AIS
+      </div>
       <div class="flex p-5 gap-3">
         <Button
           label="Расписание"

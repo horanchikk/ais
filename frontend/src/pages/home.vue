@@ -3,7 +3,7 @@
     <VirtualScroller :items="films" :item-size="1" style="height: 100%">
       <template v-slot:item="film">
         <!-- bg-gray-200 rounded-lg shadow-lg -->
-        <div class="flex gap-5 p-4 mx-36 my-10 bg-gray-900">
+        <div class="flex gap-5 p-4 mx-36 my-10 bg-gray-700 rounded-lg">
           <div class="h-full justify-center items-center">
             <img
               :src="film.item.imgUrl"
@@ -23,7 +23,7 @@
                 />
               </div>
             </div>
-            <p class="text-2xl">{{ film.item.description }}</p>
+            <p class="text-2xl cursor-default">{{ film.item.description }}</p>
             <Button
               label="Купить билет"
               class="p-button-raised p-button-success"
@@ -61,7 +61,7 @@ export default {
             "https://i.pinimg.com/736x/d7/62/d9/d762d93e4a541f84f758d4c28fd5f19c--wish-list-otaku.jpg",
         },
         {
-          name: "Имя фильма2",
+          name: "Иностранец 2",
           type: ["Боевик"],
           description:
             "These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best",
@@ -69,7 +69,7 @@ export default {
             "https://i.pinimg.com/originals/1f/3f/e9/1f3fe9eb11b059bbeabc578f01beeccf.jpg",
         },
         {
-          name: "Имя фильма2",
+          name: "Сало 2",
           type: ["Боевик"],
           description:
             "every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures ",
@@ -77,23 +77,26 @@ export default {
             "https://i.pinimg.com/736x/d7/62/d9/d762d93e4a541f84f758d4c28fd5f19c--wish-list-otaku.jpg",
         },
         {
-          name: "Имя фильма3",
+          name: "Иная 2",
           type: ["Ужасы"],
-          description: "Описание фильма3",
+          description:
+            "Interdum et malesuada fames ac ante ipsum primis in faucibus. Mauris nisl libero, volutpat sed varius at, semper vel massa. Fusce a mauris justo. Duis tempus fermentum commodo. Integer molestie bibendum leo, et semper lectus pulvinar nec. Duis hendrerit nibh eget facilisis bibendum. Proin libero justo, porta ac dolor ultrices, fermentum convallis tellus.",
           imgUrl:
             "https://i.pinimg.com/736x/d7/62/d9/d762d93e4a541f84f758d4c28fd5f19c--wish-list-otaku.jpg",
         },
         {
-          name: "Имя фильма3",
+          name: "Иная 3",
           type: ["Ужасы"],
-          description: "Описание фильма3",
+          description:
+            "Fusce lacus sem, aliquam sed rutrum et, molestie vel diam. Duis nec vulputate diam, ut molestie velit. Maecenas ex sem, tincidunt ut turpis vitae, commodo pellentesque ipsum. Cras dolor erat, fermentum nec luctus non, fringilla eget mauris. Interdum et malesuada fames ac ante ipsum primis in faucibus. Duis pretium feugiat dignissim. Morbi non placerat leo. Nullam massa orci, posuere quis lobortis quis, pretium sed nisi. Aliquam finibus sem ex, vel dictum urna luctus quis. Maecenas laoreet finibus pellentesque. Nullam ex urna, lacinia eu semper in, convallis sed metus. Sed non consequat turpis. Interdum et malesuada fames ac ante ipsum primis in faucibus.",
           imgUrl:
             "https://i.pinimg.com/originals/1f/3f/e9/1f3fe9eb11b059bbeabc578f01beeccf.jpg",
         },
         {
           name: "Имя фильма3",
           type: ["Ужасы"],
-          description: "Описание фильма3",
+          description:
+            "Suspendisse ac ante et dolor porta fringilla. Etiam tempor facilisis fermentum. Nam molestie arcu et auctor viverra. Sed ultricies mauris augue, eu dignissim urna tempor eget. Phasellus consectetur faucibus risus. Cras semper scelerisque eros eget ornare. Nullam augue dolor, porttitor quis urna ut, maximus dignissim ex. In eget vehicula enim. Donec id lorem sit amet enim interdum dapibus vitae ac urna. Aenean vitae consectetur urna. Curabitur eget suscipit turpis, ac suscipit est. Proin quis diam a ligula semper consectetur eu eget tellus. Nulla blandit augue at eros aliquet ornare. Aenean nisi ante, porttitor finibus dui a, imperdiet elementum lacus. Proin vulputate libero eu neque commodo eleifend. Aliquam erat volutpat.",
           imgUrl:
             "https://i.pinimg.com/originals/1f/3f/e9/1f3fe9eb11b059bbeabc578f01beeccf.jpg",
         },
