@@ -1,12 +1,32 @@
 <template>
-  <div class="w-screen h-screen bg-slate-400">
-    <router-view />
+  <div class="flex flex-col w-screen h-screen bg-gray-900">
+    <header class="text-white bg-gray-700 flex justify-between">
+      <div class="flex items-center px-4 font-extrabold text-3xl">AIS</div>
+      <div class="flex p-5 gap-3">
+        <Button
+          label="Расписание"
+          class="p-button-raised p-button-success p-button-text"
+        />
+        <Button
+          label="Покупка билетов"
+          class="p-button-raised p-button-warning p-button-text"
+        />
+        <!-- https://www.primefaces.org/primevue/splitbutton for adaptive -->
+      </div>
+    </header>
+    <div class="flex-auto">
+      <router-view />
+    </div>
   </div>
 </template>
 
 <script>
+import Button from "primevue/button";
+
 export default {
-  data() {},
+  components: {
+    Button,
+  },
 };
 </script>
 

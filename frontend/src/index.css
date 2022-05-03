@@ -2,11 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-.router-link-active {
-  font-weight: 700;
+::-webkit-scrollbar {
+  display: none;
 }
-
-.theader a:hover {
-  color: aquamarine;
-  transition: 0.2s ease-in-out;
+.p-button-outlined {
+  width: 100px;
+  height: 10px;
+}
+.typeFilms {
+  min-width: 100px;
+  white-space: inherit;
 }
