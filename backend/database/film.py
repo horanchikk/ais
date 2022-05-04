@@ -18,6 +18,8 @@ class Film:
         PRICE = 'price'
         DESCRIPTION = 'description'
         PLACES = 'places'
+        IMAGE = 'image'
+        GENRES = 'genres'
 
     def __init__(
             self,
@@ -30,6 +32,8 @@ class Film:
         self.price: float = args[4]
         self.description: str = args[5]
         self.places: int = args[6]
+        self.image: str = args[7]
+        self.genres: str = args[8]
     
     def __str__(self) -> str:
         """Преобразует объект пользователя в строку"""
@@ -44,5 +48,7 @@ class Film:
             'title': self.title,
             'description': self.description,
             'places': self.places,
-            'price': self.price
+            'price': self.price,
+            'image': self.image,
+            'genres': self.genres
         }

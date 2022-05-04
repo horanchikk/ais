@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Предоставляет класс Database для работы с базой данных"""
+from json import dumps
 from typing import List, Any, Optional
 from sqlite3 import connect
 
@@ -33,7 +34,10 @@ class Database:
                 {Film.Column.DATE.value} text not null,
                 {Film.Column.TIME.value} text not null,
                 {Film.Column.PRICE.value} real not null,
-                {Film.Column.DESCRIPTION.value} text not null
+                {Film.Column.DESCRIPTION.value} text not null,
+                {Film.Column.PLACES.value} integer not null,
+                {Film.Column.IMAGE.value} text not null,
+                {Film.Column.GENRES.value} text not null
             )'''
         )
         self.connection.commit()
@@ -45,7 +49,9 @@ class Database:
             date: str,
             time: str,
             price: float,
-            places: int
+            places: int,
+            image: str,
+            genres: str
     ) -> Optional[Film]:
         """Создает объект фильма
         
@@ -54,7 +60,9 @@ class Database:
         :param date: дата премьеры
         :param time: время премьеры
         :param price: цена билета
-        :param places: количество свободных мест"""
+        :param places: количество свободных мест
+        :param image: URL постера фильма
+        :param genres: жанры фильма через запятую"""
         self.cursor.execute(
             f'''insert into {Film.table} (
                 {Film.Column.NAME.value},
@@ -67,6 +75,7 @@ class Database:
             (name, description, date, time, price, places)
         )
         self.connection.commit()
+        return self.get_user(self.cursor.lastrowid)
     
     def add_user(
             self,
@@ -90,6 +99,17 @@ class Database:
         self.connection.commit()
         return self.get_user(self.cursor.lastrowid)
     
+    def get_film(
+            self,
+            film_id: int
+    ) -> Optional[Film]:
+        result = self.cursor.execute(
+            f'select * from {Film.table} where {Film.Column.ID.value} = ?', (film_id,)
+        ).fetchone()
+        if result:
+            return Film(result)
+        return None
+    
     def get_user(
             self,
             user_id: int
@@ -100,6 +120,16 @@ class Database:
         if result:
             return User(result)
         return None
+    
+    def get_all_films(
+            self,
+            limit: int = 0
+    ) -> List[Film]:
+        limit_str = f'limit {limit}' if limit > 0 else ''
+        result = self.cursor.execute(
+            f'select * from {Film.table} {limit_str}'
+        ).fetchall()
+        return [Film(row) for row in result]
     
     def get_all_users(
             self,
@@ -136,7 +166,11 @@ class Database:
                 {User.Column.PASSWORD.value} = ?,
                 {User.Column.DISCOUNT.value} = ?,
                 {User.Column.ROLE.value} = ?
+                {User.Column.TICKETS} = ?
                 where {User.Column.ID.value} = ?''',
-            (user.login, user.password, user.discount, user.role.value, user.user_id)
+            (
+                user.login, user.password, user.discount,
+                user.role.value, user.user_id, dumps(user.tickets)
+            )
         )
         self.connection.commit()

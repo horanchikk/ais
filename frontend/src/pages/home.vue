@@ -4,7 +4,7 @@
       :items="films"
       :item-size="1"
       style="height: 100%"
-      v-if="!buyTicket && !reg"
+      v-if="!regForm"
     >
       <template v-slot:item="film">
         <!-- bg-gray-200 rounded-lg shadow-lg -->
@@ -25,7 +25,7 @@
                   v-for="genre in film.item.type"
                   :key="genre"
                   :label="genre"
-                  :class="'p-button-outlined ' + this.detectGenre(genre)"
+                  :class="'p-button-outlined w-fit' + this.detectGenre(genre)"
                   style="margin: 3px"
                 />
               </div>
@@ -34,6 +34,7 @@
             <Button
               label="Купить билет"
               class="p-button-raised p-button-success"
+              @click="displayBuy = true"
             />
           </div>
         </div>
@@ -53,16 +54,9 @@
           <h1 class="text-white text-center text-2xl p-2">
             Бронирование билетов на фильм "{{ filmName }}"
           </h1>
-          <div class="flex flex-auto justify-center items-center p-2">
-            <Calendar
-              v-model="selectedDate"
-              :inline="true"
-              :showWeek="true"
-              :showButtonBar="true"
-              :date-format="'dd.mm.yy'"
-              :touchUI="false"
-            />
-          </div>
+          <div
+            class="flex flex-auto flex-col justify-center items-center p-2"
+          ></div>
         </div>
       </div>
     </div>
@@ -81,20 +75,72 @@
         </div>
       </div>
     </div>
+
+    <div v-else>errrrrror</div>
+    <Dialog v-model:visible="displayBuy" :modal="true" :draggable="false">
+      <template #header>
+        <div class="flex flex-col" v-if="state == 1">
+          <h1 class="text-xl">Покупка билета</h1>
+          <br />
+          <h2 class="text-sm">Выберите дату</h2>
+        </div>
+      </template>
+      <div v-if="state == 1">
+        <div class="confirmation-content">
+          <Calendar
+            v-model="selectedDate"
+            :inline="true"
+            :showWeek="true"
+            :showButtonBar="true"
+            :date-format="'dd.mm.yy'"
+            :touchUI="false"
+          />
+        </div>
+      </div>
+
+      <div v-if="state == 2">
+        <div class="confirmation-content">иди нахуй</div>
+      </div>
+
+      <template #footer>
+        <div v-if="state == 1">
+          <Button
+            label="Отмена"
+            icon="pi pi-times"
+            @click="displayBuy = false"
+            class="p-button-text"
+          />
+          <Button
+            label="Купить билет"
+            icon="pi pi-check"
+            @click="state = 2"
+            class="p-button-text"
+            autofocus
+          />
+        </div>
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script>
 import Button from "primevue/button";
 import VirtualScroller from "primevue/virtualscroller";
+import Calendar from "primevue/calendar";
+import InputText from "primevue/inputtext";
+import Dialog from "primevue/dialog";
 import Genre from "../mixins/genre.js";
+import CinemaAPI from "../mixins/cinemaApi.js";
 
 export default {
   data() {
     return {
-      buyTicket: false,
-      regForm: true,
+      regForm: false,
+      displayBuy: false,
+      displaytest: false,
       filmName: "nigger",
+      selectedDate: null,
+      state: 1,
       films: [
         {
           name: "САЛО",
@@ -158,8 +204,11 @@ export default {
   components: {
     Button,
     VirtualScroller,
+    Calendar,
+    InputText,
+    Dialog,
   },
-  mixins: [Genre],
+  mixins: [Genre, CinemaAPI],
 };
 </script>
 

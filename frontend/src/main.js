@@ -7,4 +7,4 @@ import "primevue/resources/themes/md-dark-indigo/theme.css";
 import "primevue/resources/primevue.min.css";
 import "primeicons/primeicons.css ";
 
-createApp(App).use(router).use(PrimeVue).mount("#app");
+createApp(App).use(router).use(PrimeVue, { ripple: true }).mount("#app");
