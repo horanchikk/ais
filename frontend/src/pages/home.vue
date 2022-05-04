@@ -3,7 +3,8 @@
     <VirtualScroller :items="films" :item-size="1" style="height: 100%">
       <template v-slot:item="film">
         <!-- bg-gray-200 rounded-lg shadow-lg -->
-        <div class="flex gap-5 p-4 mx-36 my-10 bg-gray-700 rounded-lg">
+        <!-- mx-16 my-5  -->
+        <div class="flex gap-5 p-4 mx-16 my-5 bg-gray-700 rounded-lg">
           <div class="h-full justify-center items-center">
             <img
               :src="film.item.imgUrl"
@@ -20,6 +21,7 @@
                   :key="genre"
                   :label="genre"
                   :class="'p-button-outlined ' + this.detectGenre(genre)"
+                  style="margin: 3px"
                 />
               </div>
             </div>
