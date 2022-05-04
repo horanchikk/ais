@@ -4,6 +4,7 @@ from typing import List, Any, Optional
 from sqlite3 import connect
 
 from .user import User
+from .film import Film
 
 
 class Database:
@@ -20,8 +21,50 @@ class Database:
                 {User.Column.ROLE.value} text not null,
                 {User.Column.LOGIN.value} text not null,
                 {User.Column.PASSWORD.value} text not null,
-                {User.Column.DISCOUNT.value} real not null
+                {User.Column.DISCOUNT.value} real not null,
+                {User.Column.TICKETS.value} text not null,
+                {User.Column.PLACES.value} int not null
             )'''
+        )
+        self.cursor.execute(
+            f'''create table if not exists {Film.table} (
+                {Film.Column.ID.value} integer primary key,
+                {Film.Column.NAME.value} text not null,
+                {Film.Column.DATE.value} text not null,
+                {Film.Column.TIME.value} text not null,
+                {Film.Column.PRICE.value} real not null,
+                {Film.Column.DESCRIPTION.value} text not null
+            )'''
+        )
+        self.connection.commit()
+    
+    def add_film(
+            self,
+            name: str,
+            description: str,
+            date: str,
+            time: str,
+            price: float,
+            places: int
+    ) -> Optional[Film]:
+        """Создает объект фильма
+        
+        :param name: название фильма
+        :param description: описание фильма
+        :param date: дата премьеры
+        :param time: время премьеры
+        :param price: цена билета
+        :param places: количество свободных мест"""
+        self.cursor.execute(
+            f'''insert into {Film.table} (
+                {Film.Column.NAME.value},
+                {Film.Column.DESCRIPTIONlue},
+                {Film.Column.DATE.value},
+                {Film.Column.TIME.value},
+                {Film.Column.PRICE.value},
+                {Film.Column.PLACES.value},
+            ) values (?, ?, ?, ?, ?, ?)''',
+            (name, description, date, time, price, places)
         )
         self.connection.commit()
     
@@ -39,9 +82,10 @@ class Database:
                 {User.Column.LOGIN.value},
                 {User.Column.PASSWORD.value},
                 {User.Column.ROLE.value},
-                {User.Column.DISCOUNT.value}
-            ) values (?, ?, ?, ?)''',
-            (login, password, role, discount)
+                {User.Column.DISCOUNT.value},
+                {User.Column.TICKETS.value}
+            ) values (?, ?, ?, ?, ?)''',
+            (login, password, role, discount, '[]')
         )
         self.connection.commit()
         return self.get_user(self.cursor.lastrowid)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from typing import List, Any
 from enum import Enum
+from json import loads
+from typing import List, Any
 
 
 class User:
@@ -11,17 +12,19 @@ class User:
 
     class Column(Enum):
         """Названия колонок в таблице"""
-        ID = 'id'
-        ROLE = 'role'
-        LOGIN = 'login'
-        PASSWORD = 'password'
-        DISCOUNT = 'discount'
+        ID = 'id'  # ID полльзователя
+        ROLE = 'role'  # роль пользователя
+        LOGIN = 'login'  # имя пользователя
+        PASSWORD = 'password'  # пароль пользователя
+        DISCOUNT = 'discount'  # скидка на фильмы (в процентах)
+        TICKETS = 'tickets'  # список из айдишников фильмов
 
     class Role(Enum):
         """Роли пользователей
-        клиент и кассир соответственно"""
+        клиент, кассир и администратор соответственно"""
         CLIENT = 'client'
         CASHIER = 'cashier'
+        ADMIN = 'admin'
 
         @staticmethod
         def has(item):
@@ -36,6 +39,7 @@ class User:
         self.login = args[2]
         self.password = args[3]
         self.discount = args[4]
+        self.tickets = loads(args[5])
     
     def __str__(self) -> str:
         """Преобразует объект пользователя в строку"""
@@ -47,5 +51,6 @@ class User:
             'id': self.user_id,
             'role': self.role.value,
             'login': self.login,
-            'discount': self.discount
+            'discount': self.discount,
+            'tickets': self.tickets
         }

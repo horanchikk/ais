@@ -1,6 +1,11 @@
 <template>
   <div class="h-full w-full text-white">
-    <VirtualScroller :items="films" :item-size="1" style="height: 100%">
+    <VirtualScroller
+      :items="films"
+      :item-size="1"
+      style="height: 100%"
+      v-if="!buyTicket && !reg"
+    >
       <template v-slot:item="film">
         <!-- bg-gray-200 rounded-lg shadow-lg -->
         <!-- mx-16 my-5  -->
@@ -34,6 +39,48 @@
         </div>
       </template>
     </VirtualScroller>
+
+    <!-- Get Ticket -->
+    <div
+      class="h-full w-full flex justify-center items-center"
+      v-else-if="buyTicket"
+    >
+      <div class="h-5/6 w-5/6">
+        <div
+          class="h-full w-full flex flex-col rounded-md"
+          style="background-color: rgb(31, 31, 31)"
+        >
+          <h1 class="text-white text-center text-2xl p-2">
+            Бронирование билетов на фильм "{{ filmName }}"
+          </h1>
+          <div class="flex flex-auto justify-center items-center p-2">
+            <Calendar
+              v-model="selectedDate"
+              :inline="true"
+              :showWeek="true"
+              :showButtonBar="true"
+              :date-format="'dd.mm.yy'"
+              :touchUI="false"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reg Form -->
+    <div
+      class="h-full w-full flex justify-center items-center"
+      v-else-if="regForm"
+    >
+      <div class="h-5/6 w-5/6">
+        <div
+          class="h-full w-full flex flex-col rounded-md"
+          style="background-color: rgb(31, 31, 31)"
+        >
+          <div class="flex flex-auto justify-center items-center p-2"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -45,6 +92,9 @@ import Genre from "../mixins/genre.js";
 export default {
   data() {
     return {
+      buyTicket: false,
+      regForm: true,
+      filmName: "nigger",
       films: [
         {
           name: "САЛО",
@@ -113,4 +163,12 @@ export default {
 };
 </script>
 
-<style />
+<style>
+.p-datepicker {
+  background-color: rgb(39, 47, 59);
+}
+
+.p-datepicker-header {
+  background-color: rgb(39, 47, 59);
+}
+</style>

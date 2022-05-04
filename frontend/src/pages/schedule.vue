@@ -1,7 +1,10 @@
 <template>
   <div class="h-full w-full flex justify-center items-center">
     <div class="h-5/6 w-5/6">
-      <div class="h-full w-full flex flex-col bg-gray-700">
+      <div
+        class="h-full w-full flex flex-col rounded-md"
+        style="background-color: rgb(31, 31, 31)"
+      >
         <h1 class="text-white text-center text-2xl p-2">
           Бронирование билетов на фильм "{{ filmName }}"
         </h1>
@@ -12,6 +15,7 @@
             :showWeek="true"
             :showButtonBar="true"
             :date-format="'dd.mm.yy'"
+            :touchUI="false"
           />
         </div>
       </div>
@@ -36,4 +40,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style />
