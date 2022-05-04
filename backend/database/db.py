@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Предоставляет класс Database для работы с базой данных"""
-from typing import List, Any
+from typing import List, Any, Optional
 from sqlite3 import connect
 
 from .user import User
@@ -29,9 +29,11 @@ class Database:
             self,
             login: str,
             password: str,
-            role: User.Role = User.Role.CLIENT,
+            role: str = User.Role.CLIENT.value,
             discount: float = 0.0
-    ) -> User:
+    ) -> Optional[User]:
+        if not User.Role.has(role):
+            return None
         self.cursor.execute(
             f'''insert into {User.table} (
                 {User.Column.LOGIN.value},
@@ -39,7 +41,7 @@ class Database:
                 {User.Column.ROLE.value},
                 {User.Column.DISCOUNT.value}
             ) values (?, ?, ?, ?)''',
-            (login, password, role.value, discount)
+            (login, password, role, discount)
         )
         self.connection.commit()
         return self.get_user(self.cursor.lastrowid)
@@ -47,10 +49,13 @@ class Database:
     def get_user(
             self,
             user_id: int
-    ) -> User:
-        return User(self.cursor.execute(
+    ) -> Optional[User]:
+        result = self.cursor.execute(
             f'select * from {User.table} where {User.Column.ID.value} = ?', (user_id,)
-        ).fetchone())
+        ).fetchone()
+        if result:
+            return User(result)
+        return None
     
     def get_all_users(
             self,
@@ -66,10 +71,13 @@ class Database:
             self,
             column: User.Column,
             value: Any
-    ) -> User:
-        return User(self.cursor.execute(
+    ) -> Optional[User]:
+        result = self.cursor.execute(
             f'select * from {User.table} where {column.value} = ?', (value,)
-        ).fetchone())
+        ).fetchone()
+        if result:
+            return User(result)
+        return None
     
     def save_user(
             self,

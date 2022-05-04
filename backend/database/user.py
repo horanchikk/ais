@@ -11,17 +11,21 @@ class User:
 
     class Column(Enum):
         """Названия колонок в таблице"""
-        ID: str = 'id'
-        ROLE: str = 'role'
-        LOGIN: str = 'login'
-        PASSWORD: str = 'password'
-        DISCOUNT: str = 'discount'
+        ID = 'id'
+        ROLE = 'role'
+        LOGIN = 'login'
+        PASSWORD = 'password'
+        DISCOUNT = 'discount'
 
     class Role(Enum):
         """Роли пользователей
         клиент и кассир соответственно"""
-        CLIENT: str = 'client'
-        CASHIER: str = 'cashier'
+        CLIENT = 'client'
+        CASHIER = 'cashier'
+
+        @staticmethod
+        def has(item):
+            return item in [i.value for i in User.Role.__members__.values()]
 
     def __init__(
             self,
