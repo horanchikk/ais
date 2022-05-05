@@ -7,9 +7,7 @@
       v-if="!regForm"
     >
       <template v-slot:item="film">
-        <!-- bg-gray-200 rounded-lg shadow-lg -->
-        <!-- mx-16 my-5  -->
-        <div class="flex gap-5 p-4 mx-16 my-5 bg-gray-700 rounded-lg">
+        <div :class="this.blockui('filmblock')">
           <div class="h-full justify-center items-center">
             <img
               :src="film.item.imgUrl"
@@ -30,7 +28,7 @@
                 />
               </div>
             </div>
-            <p class="text-2xl cursor-default">{{ film.item.description }}</p>
+            <p ;class="this.blockui('filmdesc') + cursor-default">{{ film.item.description }}</p>
             <Button
               label="Купить билет"
               class="p-button-raised p-button-success"
@@ -140,6 +138,7 @@ export default {
       displaytest: false,
       filmName: "nigger",
       selectedDate: null,
+      mobileUI: true,
       state: 1,
       films: [
         {
@@ -209,6 +208,15 @@ export default {
     Dialog,
   },
   mixins: [Genre, CinemaAPI],
+  methods: {
+    blockui(value) {
+      if (this.mobileUI) {
+        if (value === 'filmblock') {return 'flex gap-5 p-4 mx-2 my-5 bg-gray-700 rounded-lg'} else if (value === 'filmdesc') {return 'text-xl'}
+      } else {
+        if (value === 'filmblock') {return 'flex gap-5 p-4 mx-16 my-5 bg-gray-700 rounded-lg'} else if (value === 'filmdesc') {return 'text-2xl'}
+      }
+    }
+  }
 };
 </script>
 
