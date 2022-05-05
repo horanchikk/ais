@@ -28,11 +28,13 @@
                 />
               </div>
             </div>
-            <p ;class="this.blockui('filmdesc') + cursor-default">{{ film.item.description }}</p>
+            <p :class="this.blockui('filmdesc') + 'cursor-default'">
+              {{ film.item.description }}
+            </p>
             <Button
               label="Купить билет"
               class="p-button-raised p-button-success"
-              @click="displayBuy = true"
+              @click="buyTicket(film.item.name, film.item.filmid)"
             />
           </div>
         </div>
@@ -67,7 +69,7 @@
       <div class="h-5/6 w-5/6">
         <div
           class="h-full w-full flex flex-col rounded-md"
-          style="background-color: rgb(31, 31, 31)"
+          style="background-color: #1f1f1f"
         >
           <div class="flex flex-auto justify-center items-center p-2"></div>
         </div>
@@ -78,7 +80,9 @@
     <Dialog v-model:visible="displayBuy" :modal="true" :draggable="false">
       <template #header>
         <div class="flex flex-col" v-if="state == 1">
-          <h1 class="text-xl">Покупка билета</h1>
+          <h1 class="text-xl">
+            Покупка билета на фильм "{{ this.filmdata.name }}"
+          </h1>
           <br />
           <h2 class="text-sm">Выберите дату</h2>
         </div>
@@ -97,7 +101,15 @@
       </div>
 
       <div v-if="state == 2">
-        <div class="confirmation-content">иди нахуй</div>
+        <div class="confirmation-content">
+          <QrcodeVue
+            :value="`Куплен билет на фильм '${this.filmdata.name}'`"
+            :size="300"
+            :background="'#1f1f1f'"
+            :foreground="'#fff'"
+            :level="'L'"
+          ></QrcodeVue>
+        </div>
       </div>
 
       <template #footer>
@@ -129,16 +141,17 @@ import InputText from "primevue/inputtext";
 import Dialog from "primevue/dialog";
 import Genre from "../mixins/genre.js";
 import CinemaAPI from "../mixins/cinemaApi.js";
+import QrcodeVue from "qrcode.vue";
 
 export default {
   data() {
     return {
       regForm: false,
       displayBuy: false,
-      displaytest: false,
-      filmName: "nigger",
+      filmName: "TestFilm",
       selectedDate: null,
-      mobileUI: true,
+      mobileUI: false,
+      filmdata: null,
       state: 1,
       films: [
         {
@@ -148,6 +161,7 @@ export default {
             "At vero rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.",
           imgUrl:
             "https://i.pinimg.com/originals/1f/3f/e9/1f3fe9eb11b059bbeabc578f01beeccf.jpg",
+          filmid: 1,
         },
         {
           name: "Иная",
@@ -156,6 +170,7 @@ export default {
             "On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. ",
           imgUrl:
             "https://i.pinimg.com/736x/d7/62/d9/d762d93e4a541f84f758d4c28fd5f19c--wish-list-otaku.jpg",
+          filmid: 2,
         },
         {
           name: "Иностранец 2",
@@ -164,6 +179,7 @@ export default {
             "These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best",
           imgUrl:
             "https://i.pinimg.com/originals/1f/3f/e9/1f3fe9eb11b059bbeabc578f01beeccf.jpg",
+          filmid: 3,
         },
         {
           name: "Сало 2",
@@ -172,6 +188,7 @@ export default {
             "every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures ",
           imgUrl:
             "https://i.pinimg.com/736x/d7/62/d9/d762d93e4a541f84f758d4c28fd5f19c--wish-list-otaku.jpg",
+          filmid: 4,
         },
         {
           name: "Иная 2",
@@ -180,6 +197,7 @@ export default {
             "Interdum et malesuada fames ac ante ipsum primis in faucibus. Mauris nisl libero, volutpat sed varius at, semper vel massa. Fusce a mauris justo. Duis tempus fermentum commodo. Integer molestie bibendum leo, et semper lectus pulvinar nec. Duis hendrerit nibh eget facilisis bibendum. Proin libero justo, porta ac dolor ultrices, fermentum convallis tellus.",
           imgUrl:
             "https://i.pinimg.com/736x/d7/62/d9/d762d93e4a541f84f758d4c28fd5f19c--wish-list-otaku.jpg",
+          filmid: 5,
         },
         {
           name: "Иная 3",
@@ -188,6 +206,7 @@ export default {
             "Fusce lacus sem, aliquam sed rutrum et, molestie vel diam. Duis nec vulputate diam, ut molestie velit. Maecenas ex sem, tincidunt ut turpis vitae, commodo pellentesque ipsum. Cras dolor erat, fermentum nec luctus non, fringilla eget mauris. Interdum et malesuada fames ac ante ipsum primis in faucibus. Duis pretium feugiat dignissim. Morbi non placerat leo. Nullam massa orci, posuere quis lobortis quis, pretium sed nisi. Aliquam finibus sem ex, vel dictum urna luctus quis. Maecenas laoreet finibus pellentesque. Nullam ex urna, lacinia eu semper in, convallis sed metus. Sed non consequat turpis. Interdum et malesuada fames ac ante ipsum primis in faucibus.",
           imgUrl:
             "https://i.pinimg.com/originals/1f/3f/e9/1f3fe9eb11b059bbeabc578f01beeccf.jpg",
+          filmid: 6,
         },
         {
           name: "Имя фильма3",
@@ -196,6 +215,7 @@ export default {
             "Suspendisse ac ante et dolor porta fringilla. Etiam tempor facilisis fermentum. Nam molestie arcu et auctor viverra. Sed ultricies mauris augue, eu dignissim urna tempor eget. Phasellus consectetur faucibus risus. Cras semper scelerisque eros eget ornare. Nullam augue dolor, porttitor quis urna ut, maximus dignissim ex. In eget vehicula enim. Donec id lorem sit amet enim interdum dapibus vitae ac urna. Aenean vitae consectetur urna. Curabitur eget suscipit turpis, ac suscipit est. Proin quis diam a ligula semper consectetur eu eget tellus. Nulla blandit augue at eros aliquet ornare. Aenean nisi ante, porttitor finibus dui a, imperdiet elementum lacus. Proin vulputate libero eu neque commodo eleifend. Aliquam erat volutpat.",
           imgUrl:
             "https://i.pinimg.com/originals/1f/3f/e9/1f3fe9eb11b059bbeabc578f01beeccf.jpg",
+          filmid: 7,
         },
       ],
     };
@@ -206,17 +226,36 @@ export default {
     Calendar,
     InputText,
     Dialog,
+    QrcodeVue,
   },
   mixins: [Genre, CinemaAPI],
   methods: {
+    buyTicket(filmName, filmID) {
+      this.filmdata = {
+        name: filmName,
+        filmid: filmID,
+      };
+      this.selectedDate = null;
+      this.state = 1;
+      this.displayBuy = true;
+      console.log(this.filmdata);
+    },
     blockui(value) {
       if (this.mobileUI) {
-        if (value === 'filmblock') {return 'flex gap-5 p-4 mx-2 my-5 bg-gray-700 rounded-lg'} else if (value === 'filmdesc') {return 'text-xl'}
+        if (value === "filmblock") {
+          return "flex gap-5 p-4 mx-2 my-5 bg-gray-700 rounded-lg";
+        } else if (value === "filmdesc") {
+          return "text-xl";
+        }
       } else {
-        if (value === 'filmblock') {return 'flex gap-5 p-4 mx-16 my-5 bg-gray-700 rounded-lg'} else if (value === 'filmdesc') {return 'text-2xl'}
+        if (value === "filmblock") {
+          return "flex gap-5 p-4 mx-16 my-5 bg-gray-700 rounded-lg";
+        } else if (value === "filmdesc") {
+          return "text-2xl";
+        }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
