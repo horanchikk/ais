@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from enum import Enum
 from fastapi.responses import JSONResponse
 from fastapi import status
 
@@ -20,6 +19,7 @@ def gen_error(
 
 class Error:
     INVALID_PASS_LOGIN = gen_error('Неправильный логин или пароль', 1)
-    USER_IS_NOT_EXISTS = gen_error('Пользователь не существует', 2)
+    USER_NOT_EXISTS = gen_error('Пользователь не существует', 2)
     LOGIN_IS_EXISTS = gen_error('Этот логин уже занят', 3)
     NO_ACCESS = gen_error('Нет доступа на выполнение запроса', 4)
+    FILM_NOT_EXISTS = gen_error('Фильм не существует', 5)

@@ -10,6 +10,9 @@ from .film import Film
 
 class Database:
     """Предоставляет работу с пользователями"""
+    user_table: str = 'user'
+    film_table: str = 'film'
+
     def __init__(
             self,
             filename: str = 'database.db'
@@ -17,18 +20,17 @@ class Database:
         self.connection = connect(filename)
         self.cursor = self.connection.cursor()
         self.cursor.execute(
-            f'''create table if not exists {User.table} (
+            f'''create table if not exists {self.user_table} (
                 {User.Column.ID.value} integer primary key,
                 {User.Column.ROLE.value} text not null,
                 {User.Column.LOGIN.value} text not null,
                 {User.Column.PASSWORD.value} text not null,
                 {User.Column.DISCOUNT.value} real not null,
-                {User.Column.TICKETS.value} text not null,
-                {User.Column.PLACES.value} int not null
+                {User.Column.TICKETS.value} text not null
             )'''
         )
         self.cursor.execute(
-            f'''create table if not exists {Film.table} (
+            f'''create table if not exists {self.film_table} (
                 {Film.Column.ID.value} integer primary key,
                 {Film.Column.NAME.value} text not null,
                 {Film.Column.DATE.value} text not null,
@@ -51,7 +53,7 @@ class Database:
             price: float,
             places: int,
             image: str,
-            genres: str
+            genres: List[str]
     ) -> Optional[Film]:
         """Создает объект фильма
         
@@ -64,18 +66,20 @@ class Database:
         :param image: URL постера фильма
         :param genres: жанры фильма через запятую"""
         self.cursor.execute(
-            f'''insert into {Film.table} (
+            f'''insert into {self.film_table} (
                 {Film.Column.NAME.value},
-                {Film.Column.DESCRIPTIONlue},
+                {Film.Column.DESCRIPTION.value},
                 {Film.Column.DATE.value},
                 {Film.Column.TIME.value},
                 {Film.Column.PRICE.value},
                 {Film.Column.PLACES.value},
-            ) values (?, ?, ?, ?, ?, ?)''',
-            (name, description, date, time, price, places)
+                {Film.Column.IMAGE.value},
+                {Film.Column.GENRES.value}
+            ) values (?, ?, ?, ?, ?, ?, ?, ?)''',
+            (name, description, date, time, price, places, image, ' '.join(genres))
         )
         self.connection.commit()
-        return self.get_user(self.cursor.lastrowid)
+        return self.get_film(self.cursor.lastrowid)
     
     def add_user(
             self,
@@ -87,7 +91,7 @@ class Database:
         if not User.Role.has(role):
             return None
         self.cursor.execute(
-            f'''insert into {User.table} (
+            f'''insert into {self.user_table} (
                 {User.Column.LOGIN.value},
                 {User.Column.PASSWORD.value},
                 {User.Column.ROLE.value},
@@ -104,10 +108,10 @@ class Database:
             film_id: int
     ) -> Optional[Film]:
         result = self.cursor.execute(
-            f'select * from {Film.table} where {Film.Column.ID.value} = ?', (film_id,)
+            f'select * from {self.film_table} where {Film.Column.ID.value} = ?', (film_id,)
         ).fetchone()
         if result:
-            return Film(result)
+            return Film(*result)
         return None
     
     def get_user(
@@ -115,10 +119,10 @@ class Database:
             user_id: int
     ) -> Optional[User]:
         result = self.cursor.execute(
-            f'select * from {User.table} where {User.Column.ID.value} = ?', (user_id,)
+            f'select * from {self.user_table} where {User.Column.ID.value} = ?', (user_id,)
         ).fetchone()
         if result:
-            return User(result)
+            return User(*result)
         return None
     
     def get_all_films(
@@ -127,9 +131,9 @@ class Database:
     ) -> List[Film]:
         limit_str = f'limit {limit}' if limit > 0 else ''
         result = self.cursor.execute(
-            f'select * from {Film.table} {limit_str}'
+            f'select * from {self.film_table} {limit_str}'
         ).fetchall()
-        return [Film(row) for row in result]
+        return [Film(*row) for row in result]
     
     def get_all_users(
             self,
@@ -137,9 +141,9 @@ class Database:
     ) -> List[User]:
         limit_str = f'limit {limit}' if limit > 0 else ''
         result = self.cursor.execute(
-            f'select * from {User.table} {limit_str}'
+            f'select * from {self.user_table} {limit_str}'
         ).fetchall()
-        return [User(row) for row in result]
+        return [User(*row) for row in result]
     
     def get_user_by(
             self,
@@ -147,21 +151,46 @@ class Database:
             value: Any
     ) -> Optional[User]:
         result = self.cursor.execute(
-            f'select * from {User.table} where {column.value} = ?', (value,)
+            f'select * from {self.user_table} where {column.value} = ?', (value,)
         ).fetchone()
         if result:
-            return User(result)
+            return User(*result)
         return None
     
+    def save_film(
+            self,
+            film: Film
+    ):
+        """Сохранение фильма в таблице
+        
+        :param film: объект фильма"""
+        self.cursor.execute(
+            f'''update {self.film_table} set
+                {Film.Column.NAME.value} = ?,
+                {Film.Column.DESCRIPTION.value} = ?,
+                {Film.Column.PLACES.value} = ?,
+                {Film.Column.PRICE.value} = ?,
+                {Film.Column.IMAGE.value} = ?,
+                {Film.Column.GENRES.value} = ?,
+                {Film.Column.DATE.value} = ?,
+                {Film.Column.TIME.value} = ?,
+                where {Film.Column.ID.value} = ?''',
+            (
+                film.name, film.description, film.places, film.price,
+                film.image, ' '.join(film.genres), film.date, film.time
+            )
+        )
+        self.connection.commit()
+
     def save_user(
             self,
             user: User
     ):
         """Сохранение пользователя в таблице
-        
+
         :param user: объект пользователя"""
         self.cursor.execute(
-            f'''update {User.table} set
+            f'''update {self.user_table} set
                 {User.Column.LOGIN.value} = ?,
                 {User.Column.PASSWORD.value} = ?,
                 {User.Column.DISCOUNT.value} = ?,

@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 
 from database import Database, User
+from models import RegisterModel, LoginModel, FilmEditModel
 from errors import Error
 from config import ADMIN_TOKEN
 
@@ -15,16 +16,17 @@ app.mount('/films', films_router)
 SUCCESS = {'response': 'success'}
 
 
-@users_router.get('/login')
+@users_router.post('/login')
 async def users_get(
-        login: str,
-        password: str
+        model: LoginModel
 ):
-    """Проверяет правильность логина и пароля"""
-    user = db.get_user_by(User.Column.LOGIN, login)
+    """Проверяет правильность логина и пароля
+
+    :param model: Модель авторизации"""
+    user = db.get_user_by(User.Column.LOGIN, model.login)
     if not user:
         return Error.INVALID_PASS_LOGIN
-    if user.password != password:
+    if user.password != model.password:
         return Error.INVALID_PASS_LOGIN
     return {'response': user.json()}
 
@@ -36,7 +38,7 @@ async def users_get(
     """Возвращает объект пользователя по его ID"""
     user = db.get_user(user_id)
     if not user:
-        return Error.USER_IS_NOT_EXISTS
+        return Error.USER_NOT_EXISTS
     return {'response': user.json()}
 
 
@@ -47,28 +49,20 @@ async def users_get(limit: int = 0):
     return {'response': [user.json() for user in users]}
 
 
-@users_router.get('/register')
+@users_router.post('/reg')
 async def asd(
-        login: str,
-        password: str,
-        role: str = User.Role.CLIENT.value,
-        discount: int = 0.0,
-        access_key: str = ''
+        model: RegisterModel
 ):
     """Регистрирует нового пользователя
 
-    :param login: Логин для регистрации
-    :param password: Пароль для регистрации
-    :param role: Роль регистрируемого пользователя
-    :param discount: Скидка регистрируемого пользователя
-    :param access_key: Ключ доступа (для параметров роли и скидки"""
-    user = db.get_user_by(User.Column.LOGIN, login)
+    :param model: Модель регистрации"""
+    user = db.get_user_by(User.Column.LOGIN, model.login)
     if user:
         return Error.LOGIN_IS_EXISTS
-    if access_key != ADMIN_TOKEN and (role != User.Role.CLIENT.value or discount != 0.0):
+    if model.access_key != ADMIN_TOKEN and (model.role != User.Role.CLIENT.value or model.discount != 0.0):
         return Error.NO_ACCESS
     user = db.add_user(
-        login, password, role, discount
+        model.login, model.password, model.role, model.discount
     )
     return {'response': user.json()}
 
@@ -77,10 +71,14 @@ async def asd(
 
 
 @films_router.get('/get')
-async def films_get_all(
+async def films_get(
         film_id: int
 ):
     """Возвращает фильм по его ID."""
+    film = db.get_film(film_id)
+    if not film:
+        return Error.FILM_NOT_EXISTS
+    return {'response': film.json()}
 
 
 @films_router.get('/getall')
@@ -92,3 +90,20 @@ async def films_get_all(
     :param limit: Количество возвращаемых пользователей"""
     films = db.get_all_films(limit)
     return {'response': [film.json() for film in films]}
+
+
+@films_router.post('/new')
+async def films_new(
+        model: FilmEditModel
+):
+    """Создает новый фильм
+
+    :param model: модель фильма"""
+    if model.access_key != ADMIN_TOKEN:
+        return Error.NO_ACCESS
+    film = db.add_film(
+        model.name, model.description, model.date,
+        model.time, model.price, model.places, model.image,
+        model.genres
+    )
+    return {'response': film.json()}

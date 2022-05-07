@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from typing import List, Any
 from enum import Enum
+from typing import Dict, Any
 
 
 class Film:
     """Предоставляет удобный интерфейс
-    для работы с таблицей фильмов
-    """
-    table: str = 'film'
+    для работы с таблицей фильмов"""
 
     class Column(Enum):
         """Названия колонок в таблице"""
@@ -23,7 +21,7 @@ class Film:
 
     def __init__(
             self,
-            args: List[Any]
+            *args: Any
     ):
         self.film_id: int = args[0]
         self.name: str = args[1]
@@ -33,22 +31,21 @@ class Film:
         self.description: str = args[5]
         self.places: int = args[6]
         self.image: str = args[7]
-        self.genres: str = args[8]
-    
+        self.genres: str = args[8].split()
+
     def __str__(self) -> str:
         """Преобразует объект пользователя в строку"""
-        return f'[{self.film_id}] {self.name}, {self.role}, {self.places} places'
-    
-    def json(self):
-        """Преобразует объект пользователя в JSON, скрывая при этом пароль"""
+        return f'[{self.film_id}] {self.name} {self.places} places'
+
+    def json(self) -> Dict[str, Any]:
         return {
-            'id': self.user_id,
+            'id': self.film_id,
             'name': self.name,
-            'date': self.date,
-            'title': self.title,
             'description': self.description,
-            'places': self.places,
+            'date': self.date,
+            'time': self.time,
             'price': self.price,
+            'places': self.places,
             'image': self.image,
             'genres': self.genres
         }

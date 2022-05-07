@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
 from json import loads
-from typing import List, Any
+from typing import List, Dict, Any
 
 
 class User:
     """Предоставляет удобный интерфейс
     для работы с таблицей пользователей
     """
-    table: str = 'user'
 
     class Column(Enum):
         """Названия колонок в таблице"""
@@ -32,21 +31,20 @@ class User:
 
     def __init__(
             self,
-            args: List[Any]
+            *args: Any
     ):
         self.user_id: int = args[0]
-        self.role = User.Role(args[1])
-        self.login = args[2]
-        self.password = args[3]
-        self.discount = args[4]
-        self.tickets = loads(args[5])
+        self.role: User.Role = User.Role(args[1])
+        self.login: str = args[2]
+        self.password: str = args[3]
+        self.discount: float = args[4]
+        self.tickets: List[Any] = loads(args[5])
     
     def __str__(self) -> str:
         """Преобразует объект пользователя в строку"""
         return f'[{self.user_id}] {self.login}, {self.role}'
-    
-    def json(self):
-        """Преобразует объект пользователя в JSON, скрывая при этом пароль"""
+
+    def json(self) -> Dict[str, Any]:
         return {
             'id': self.user_id,
             'role': self.role.value,
