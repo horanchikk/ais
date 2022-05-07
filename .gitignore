@@ -25,3 +25,10 @@ dist-ssr
 
 package-lock.json
 yarn.lock
+
+# Python
+__pycache__
+__pycache__/
+
+# Database
+*.db
