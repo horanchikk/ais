@@ -22,5 +22,9 @@
     "postcss": "^8.4.12",
     "tailwindcss": "^3.0.24",
     "vite": "^2.9.5"
-  }
+  },
+  "description": "If you running this project for the first time, you should execute this command:",
+  "main": "postcss.config.js",
+  "author": "",
+  "license": "ISC"
 }
