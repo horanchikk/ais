@@ -11,7 +11,7 @@ async function sendPOST(url, data) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8'
     },
-    body: data
+    body: JSON.stringify(data)
   });
   return await req.json()
 }

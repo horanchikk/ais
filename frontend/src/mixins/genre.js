@@ -8,14 +8,14 @@
  * help - фиолетовый
  */
 const genres = {
-  Ужасы: "p-button-danger",
-  Триллер: "p-button-primary",
-  Комедия: "p-button-warning",
-  Романтика: "p-button-secondary",
-  Мелодрамма: "p-button-secondary",
-  Драма: "p-button-primary",
-  Фэнтези: "p-button-success",
-  Фантастика: "p-button-info",
+  ужасы: "p-button-danger",
+  триллер: "p-button-primary",
+  комедия: "p-button-warning",
+  романтика: "p-button-secondary",
+  мелодрамма: "p-button-secondary",
+  драма: "p-button-primary",
+  фэнтези: "p-button-success",
+  фантастика: "p-button-info",
 };
 
 export default {
@@ -24,8 +24,9 @@ export default {
    */
   methods: {
     detectGenre(genre) {
-      if (genre in genres) {
-        return genres[genre];
+      let g = genre.toLowerCase();
+      if (g in genres) {
+        return genres[g];
       } else {
         return "p-button-primary";
       }

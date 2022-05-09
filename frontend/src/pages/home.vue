@@ -23,12 +23,12 @@
                   v-for="genre in film.item.type"
                   :key="genre"
                   :label="genre"
-                  :class="'p-button-outlined w-fit' + this.detectGenre(genre)"
+                  :class="'p-button-outlined w-fit ' + this.detectGenre(genre)"
                   style="margin: 3px"
                 />
               </div>
             </div>
-            <p :class="this.blockui('filmdesc') + 'cursor-default'">
+            <p :class="this.blockui('filmdesc') + ' cursor-default'">
               {{ film.item.description }}
             </p>
             <Button
