@@ -27,7 +27,7 @@ echo "Installing dependencies..." && apt install python3 nodejs-lts && npm --glo
 - NodeJS (https://nodejs.org/en/download/) 
 - Python 3.10 or later (https://www.python.org/downloads/)
 
-Затем, необходимо будет установить дополнтельные пакеты:
+Затем, необходимо будет установить дополнтельные пакеты в Windows Powershell:
 
 ```ps
 (npm --global install yarn) -and (pip3 install uvicorn fastapi)
