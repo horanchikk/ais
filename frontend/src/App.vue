@@ -1,60 +1,76 @@
 <template>
   <div class="flex flex-col w-screen h-screen bg-gray-900">
-    <header class="text-white bg-gray-600 flex justify-between">
-      <div
-        class="flex items-center px-4 font-extrabold text-3xl cursor-default"
-      >
-        <router-link to="/"> AIS </router-link>
-      </div>
-      <div class="flex p-3 gap-3">
-        <Button
-          v-if="userid != null"
-          :label="`Авторизирован под ${this.userid}`"
-          class="p-button-raised p-button-success p-button-text"
-        />
-        <div v-else class="flex gap-3">
-          <Button
-            label="Авторизация"
-            class="p-button-raised p-button-warning p-button-text"
-            @click="showState(true)"
-          />
-          <Button
-            label="Регистрация"
-            class="p-button-raised p-button-help p-button-text"
-            @click="showState(false)"
-          />
+    <header class="text-white bg-gray-600">
+      <div class="flex justify-between w-screen">
+        <div
+          class="flex items-center px-4 font-extrabold text-3xl cursor-default"
+        >
+          <router-link to="/"> AIS </router-link>
         </div>
-        <!-- https://www.primefaces.org/primevue/splitbutton for adaptive -->
+        <div class="flex p-3 gap-3">
+          <Button
+            v-if="userid != null"
+            :label="`Авторизирован под ${this.userid}`"
+            class="p-button-raised p-button-success p-button-text"
+          />
+          <div v-else class="flex gap-3">
+            <Button
+              label="Войти на сайт"
+              class="p-button-raised p-button-warning p-button-text"
+              @click="showState()"
+            />
+          </div>
+          <!-- https://www.primefaces.org/primevue/splitbutton for adaptive (2k rubles) -->
+        </div>
       </div>
     </header>
-    <div class="flex-auto">
+    <div class="flex-auto bg-gray-900">
       <router-view />
     </div>
     <Dialog v-model:visible="displayState" :modal="true" :draggable="false">
       <template #header>
         <div class="flex flex-col">
-          <h1 class="text-xl">
-            {{ registrationState ? "Регистрация" : "Авторизация" }}
-          </h1>
+          <h1 class="text-xl">Войдите на сайт</h1>
         </div>
       </template>
 
-      <div class="confirmation-content">как сделать то</div>
+      <div class="content-reg">
+        <div class="col-5 flex align-items-center justify-content-center">
+          <div class="flex flex-col justify-center align-center w-full">
+            <div class="flex flex-col justify-center">
+              <label for="username">Имя пользователя </label>
+              <InputText id="username" type="text" v-model="userUsername" />
+            </div>
+            <br />
+            <div class="p-fluid">
+              <label for="password">Пароль</label>
+              <Password v-model="userPassword" />
+            </div>
+            <br />
+            <br />
+          </div>
+        </div>
+      </div>
 
       <template #footer>
-        <!-- <Button
+        <Button
           label="Отмена"
           icon="pi pi-times"
           @click="displayState = false"
           class="p-button-text"
         />
         <Button
-          label="Купить билет"
-          icon="pi pi-check"
-          @click="state = 2"
+          label="Зарегистрироваться"
+          icon="pi pi-user-plus"
           class="p-button-text"
           autofocus
-        /> -->
+        />
+        <Button
+          label="Войти"
+          icon="pi pi-users"
+          class="p-button-text"
+          autofocus
+        />
       </template>
     </Dialog>
   </div>
@@ -63,24 +79,26 @@
 <script>
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
+import CinemaAPI from "/src/mixins/cinemaApi.js";
+import Password from "primevue/password";
+import InputText from "primevue/inputtext";
 
 export default {
   data() {
     return {
       userid: null,
-      registrationState: true,
       displayState: false,
     };
   },
   components: {
     Button,
     Dialog,
+    Password,
+    InputText,
   },
+  mixins: [CinemaAPI],
   methods: {
     showState(state) {
-      state
-        ? (this.registrationState = false)
-        : (this.registrationState = true);
       this.displayState = true;
     },
   },

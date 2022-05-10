@@ -1,4 +1,4 @@
-const API_URL = "http:localhost:8000/";
+const API_URL = "http://localhost:8000/";
 
 async function sendGET(url) {
   const req = await fetch(url);
@@ -7,13 +7,13 @@ async function sendGET(url) {
 
 async function sendPOST(url, data) {
   const req = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json; charset=utf-8'
+      "Content-Type": "application/json; charset=utf-8",
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
-  return await req.json()
+  return await req.json();
 }
 
 export default {
@@ -45,4 +45,17 @@ export default {
   async getFilmById(id) {
     return await sendGET(`${API_URL}films/get?film_id=${id}`);
   },
+  async buyTicket(film_id, user_id, date) {
+    return await sendGET(
+      `%{API_URL}films/buy?film_id=${film_id}&user_id=${user_id}&date=${date}`
+    );
+  },
+  async login(login, pswd) {
+    return await sendPOST(`${API_URL}users/login`, {
+      login: login,
+      password: pswd,
+    });
+  },
+
+  async registration(login, pswd) {},
 };

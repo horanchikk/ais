@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from database import Database, User
 from models import RegisterModel, LoginModel, FilmEditModel
@@ -9,6 +10,13 @@ from config import ADMIN_TOKEN
 
 db = Database('test.db')
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 users_router = FastAPI()
 films_router = FastAPI()
 app.mount('/users', users_router)
@@ -79,6 +87,36 @@ async def films_get(
     if not film:
         return Error.FILM_NOT_EXISTS
     return {'response': film.json()}
+
+
+@films_router.get('/buy')
+async def film_buy(
+        film_id: int,
+        user_id: int,
+        date: str
+):
+    """Покупает билет на фильм, если есть свободное место"""
+    print(date)
+    return {'detail': {
+        'message': 'Вадим лох(',
+        'code': '1448'
+    }}
+    film = db.get_film(film_id)
+    if not film:
+        return Error.FILM_NOT_EXISTS
+    user = db.get_user(user_id)
+    if not user:
+        return Error.USER_NOT_EXISTS
+    if film.places > 0:
+        film.places -= 1
+        user.tickets.append(film_id)
+        db.save_film(film)
+        db.save_user(film)
+        return {'response': {
+            'user_id': user_id,
+            'film_id': film_id
+        }}
+    return Error.FILM_HASNOT_PLACES
 
 
 @films_router.get('/getall')
