@@ -1,12 +1,16 @@
 <template>
   <div class="h-full w-full text-white">
-    <div v-if="!regForm" class="overflow-scroll">
+    <div class="overflow-scroll">
       <div v-for="film in films" :key="film">
         <div :class="this.blockui('filmblock')">
           <div class="h-full justify-center items-center">
             <img
-              :src="film.image"
-              :alt="film.image"
+              :src="
+                film.image
+                  ? film.image
+                  : 'https://lv-cake.ru/imgtmp/430_506_w/data/no-photo.png'
+              "
+              :alt="film.image ? film.image : 'photo not found'"
               class="text-sm h-96 rounded-lg"
             />
           </div>
@@ -18,7 +22,7 @@
                   v-for="genre in film.genres"
                   :key="genre"
                   :label="genre"
-                  :class="`border-2 rounded-md mr-4 py-1 px-1 inline w-fit ${this.detectGenre(
+                  :class="`border-2 rounded-md mr-4 py-1 px-1 inline w-fit cursor-default ${this.detectGenre(
                     genre
                   )}`"
                 >
@@ -32,7 +36,7 @@
             <Button
               label="Купить билет"
               class="p-button-raised p-button-success"
-              @click="buyTicket(film.name, film.id, '31.12.2022')"
+              @click="buyTicket(film.name, film.id)"
             />
           </div>
         </div>
@@ -46,22 +50,25 @@
             Покупка билета на фильм "{{ this.filmdata.name }}"
           </h1>
           <br />
-          <h2 class="text-sm">Выберите дату</h2>
+        </div>
+        <div v-if="state == 2">
+          Билет успешно куплен, QR-код сохранён в личном кабинете.
         </div>
       </template>
+
       <div v-if="state == 1">
-        <div class="confirmation-content">
+        <div class="flex flex-col">
+          <label for="dateformat">Выберите дату</label>
           <Calendar
+            id="dateformat"
             v-model="selectedDate"
-            :dateFormat="`dd.mm.yy`"
-            :inline="true"
-            :touchUI="false"
+            dateFormat="mm.dd.yy"
           />
         </div>
       </div>
 
       <div v-if="state == 2">
-        <div class="confirmation-content">
+        <div class="flex justify-center">
           <QrcodeVue
             :value="
               encode(
@@ -128,7 +135,7 @@ export default {
   },
   mixins: [Genre, CinemaAPI],
   methods: {
-    async buyTicket(filmName, filmId, date) {
+    async buyTicket(filmName, filmId) {
       this.filmdata = {
         name: filmName,
         filmid: filmId,
@@ -168,25 +175,6 @@ export default {
   },
   mounted() {
     this.fetchFilms();
-  },
-  created() {
-    let today = new Date();
-    let month = today.getMonth();
-    let year = today.getFullYear();
-    let prevMonth = month === 0 ? 11 : month - 1;
-    let prevYear = prevMonth === 11 ? year - 1 : year;
-    let nextMonth = month === 11 ? 0 : month + 1;
-    let nextYear = nextMonth === 0 ? year + 1 : year;
-    this.minDate = new Date();
-    this.minDate.setMonth(prevMonth);
-    this.minDate.setFullYear(prevYear);
-    this.maxDate = new Date();
-    this.maxDate.setMonth(nextMonth);
-    this.maxDate.setFullYear(nextYear);
-
-    let invalidDate = new Date();
-    invalidDate.setDate(today.getDate() - 1);
-    this.invalidDates = [today, invalidDate];
   },
 };
 </script>
