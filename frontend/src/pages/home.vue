@@ -57,7 +57,7 @@
         </div>
       </div>
       <div class="w-full text-center text-gray-600">
-        <h1>Всегда рады помощи :3</h1>
+        We stand with <img src="." alt="" /> ukraine
       </div>
     </div>
 

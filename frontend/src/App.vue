@@ -76,6 +76,7 @@
             class="p-button-text"
             autofocus
             @click="login('login')"
+            @keydown.enter="login('login')"
           />
         </div>
         <div v-if="state == 1" class="w-full flex justify-center">
