@@ -25,7 +25,7 @@ echo "Installing dependencies..." && apt install python3 nodejs-lts && npm --glo
 Для установки зависимостей, Вам потребуется установить такие утилиты, как:
 
 - NodeJS (https://nodejs.org/en/download/) 
-- Python 3.10 or later (https://www.python.org/downloads/)
+- Python 3.8 or later (https://www.python.org/downloads/)
 
 Затем, необходимо будет установить дополнтельные пакеты в Windows Powershell:
 
