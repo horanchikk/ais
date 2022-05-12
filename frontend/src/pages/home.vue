@@ -34,12 +34,22 @@
               {{ film.description }}
             </p>
             <Button
+              v-if="this.$root.$data.userid != null"
               label="Купить билет"
               class="p-button-raised p-button-success"
               @click="buyTicket(film.name, film.id)"
             />
+            <Button
+              v-else
+              label="Войдите в аккаунт для покупки билета"
+              class="p-button-raised p-button-secondary"
+              @click="callLogin"
+            />
           </div>
         </div>
+      </div>
+      <div class="w-full text-center text-gray-600">
+        <h1>Всегда рады помощи :3</h1>
       </div>
     </div>
 
@@ -94,7 +104,7 @@
           <Button
             label="Купить билет"
             icon="pi pi-check"
-            @click="state = 2"
+            @click="showQr"
             class="p-button-text"
             autofocus
           />
@@ -140,12 +150,21 @@ export default {
         name: filmName,
         filmid: filmId,
       };
-      const date = Date.parse(this.selectedDate);
-      this.selectedDate = Date.parse(this.selectedDate);
       this.state = 1;
       this.displayBuy = true;
-      // const req = await CinemaAPI.buyTicket(filmId, 2, "");
-      // console.log(req["response"]);
+    },
+    async showQr() {
+      this.state = 2;
+      if (this.displayBuy && this.state == 2) {
+        const date = Date.parse(this.selectedDate);
+        console.log(date);
+        const req = await CinemaAPI.buyTicket(
+          this.filmdata["filmid"],
+          this.$root.$data.userid,
+          date
+        );
+        console.log(req["response"]);
+      }
     },
     blockui(value) {
       if (this.mobileUI) {
@@ -162,6 +181,10 @@ export default {
         }
       }
     },
+    callLogin() {
+      this.$root.$data.displayState = true;
+      this.$root.$data.state = 0;
+    },
     encode(text) {
       return base64.encode(text);
     },
@@ -175,6 +198,7 @@ export default {
   },
   mounted() {
     this.fetchFilms();
+    window.innerWidth < 600 ? (this.mobileUI = true) : (this.mobileUI = false);
   },
 };
 </script>

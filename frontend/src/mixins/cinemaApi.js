@@ -2,7 +2,9 @@ const API_URL = "http://localhost:8000/";
 
 async function sendGET(url) {
   const req = await fetch(url);
-  return await req.json();
+  const result = await req.json();
+  result["status"] = req.status;
+  return result;
 }
 
 async function sendPOST(url, data) {
@@ -13,7 +15,9 @@ async function sendPOST(url, data) {
     },
     body: JSON.stringify(data),
   });
-  return await req.json();
+  const result = await req.json();
+  result["status"] = req.status;
+  return result;
 }
 
 export default {
@@ -45,17 +49,28 @@ export default {
   async getFilmById(id) {
     return await sendGET(`${API_URL}films/get?film_id=${id}`);
   },
+  /**
+   * Покупка билета
+   */
   async buyTicket(film_id, user_id, date) {
     return await sendGET(
-      `%{API_URL}films/buy?film_id=${film_id}&user_id=${user_id}&date=${date}`
+      `${API_URL}films/buy?film_id=${film_id}&user_id=${user_id}&date=${date}`
     );
   },
-  async login(login, pswd) {
+  async login(login, passwd) {
     return await sendPOST(`${API_URL}users/login`, {
       login: login,
-      password: pswd,
+      password: passwd,
     });
   },
 
-  async registration(login, pswd) {},
+  async reg(login, passwd, discount = 0.0, role = "client", access_key = "") {
+    return await sendPOST(`${API_URL}users/reg`, {
+      login: login,
+      password: passwd,
+      discount: discount,
+      role: role,
+      access_key: access_key,
+    });
+  },
 };

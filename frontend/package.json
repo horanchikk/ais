@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^0.27.2",
     "base-64": "^1.0.0",
     "primeicons": "^5.0.0",
     "primevue": "^3.12.6",

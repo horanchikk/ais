@@ -96,11 +96,6 @@ async def film_buy(
         date: str
 ):
     """Покупает билет на фильм, если есть свободное место"""
-    print(date)
-    return {'detail': {
-        'message': 'Вадим лох(',
-        'code': '1448'
-    }}
     film = db.get_film(film_id)
     if not film:
         return Error.FILM_NOT_EXISTS
