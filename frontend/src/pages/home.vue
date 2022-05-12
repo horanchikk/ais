@@ -1,5 +1,8 @@
 <template>
   <div class="h-full w-full text-white">
+    <Sidebar v-model:visible="showTickets">
+      <h3>Тестирование showTickets</h3>
+    </Sidebar>
     <div class="overflow-scroll">
       <div v-for="film in films" :key="film">
         <div :class="this.blockui('filmblock')">
@@ -14,7 +17,7 @@
               class="text-sm h-96 rounded-lg"
             />
           </div>
-          <div class="flex flex-col justify-between gap-3 w-3/4">
+          <div class="flex flex-col justify-between gap-3 w-full">
             <div class="flex flex-col gap-2">
               <p class="text-4xl">{{ film.name }}</p>
               <div class="typeFilms">
@@ -22,7 +25,7 @@
                   v-for="genre in film.genres"
                   :key="genre"
                   :label="genre"
-                  :class="`border-2 rounded-md mr-4 py-1 px-1 inline w-fit cursor-default ${this.detectGenre(
+                  :class="`border-2 rounded-md mr-4 py-1 px-1 inline-block w-fit cursor-default ${this.detectGenre(
                     genre
                   )}`"
                 >
@@ -33,18 +36,23 @@
             <p :class="this.blockui('filmdesc') + ' cursor-default'">
               {{ film.description }}
             </p>
-            <Button
-              v-if="this.$root.$data.userid != null"
-              label="Купить билет"
-              class="p-button-raised p-button-success"
-              @click="buyTicket(film.name, film.id)"
-            />
-            <Button
-              v-else
-              label="Войдите в аккаунт для покупки билета"
-              class="p-button-raised p-button-secondary"
-              @click="callLogin"
-            />
+            <div class="flex flex-col">
+              <div class="w-full flex justify-end pt-4 pb-2 text-2xl">
+                <p>{{ film.price }} Р</p>
+              </div>
+              <Button
+                v-if="this.$root.$data.userid != null"
+                label="Купить билет"
+                class="p-button-raised p-button-success w-full"
+                @click="buyTicket(film.name, film.id)"
+              />
+              <Button
+                v-else
+                label="Войдите в аккаунт для покупки билета"
+                class="p-button-raised p-button-secondary w-full"
+                @click="callLogin"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -115,12 +123,18 @@
 </template>
 
 <script>
+// PrimeVue компоненты
 import Button from "primevue/button";
 import Calendar from "primevue/calendar";
 import InputText from "primevue/inputtext";
 import Dialog from "primevue/dialog";
+import Sidebar from "primevue/sidebar";
+
+// Миксины для работы с жанрами и API
 import Genre from "../mixins/genre.js";
 import CinemaAPI from "../mixins/cinemaApi.js";
+
+// Сторонние библиотеки
 import QrcodeVue from "qrcode.vue";
 import base64 from "base-64";
 
@@ -128,6 +142,7 @@ export default {
   data() {
     return {
       displayBuy: false,
+      showTickets: true,
       filmName: "TestFilm",
       selectedDate: null,
       mobileUI: false,
@@ -142,6 +157,7 @@ export default {
     InputText,
     Dialog,
     QrcodeVue,
+    Sidebar,
   },
   mixins: [Genre, CinemaAPI],
   methods: {
@@ -155,15 +171,20 @@ export default {
     },
     async showQr() {
       this.state = 2;
-      if (this.displayBuy && this.state == 2) {
+      if (this.displayBuy) {
         const date = Date.parse(this.selectedDate);
-        console.log(date);
         const req = await CinemaAPI.buyTicket(
-          this.filmdata["filmid"],
+          this.filmdata.filmid,
           this.$root.$data.userid,
           date
         );
         console.log(req["response"]);
+      } else {
+        this.$toast.add({
+          severity: "error",
+          summary: `Ошибка покупки билета (this.displayBuy == ${this.displayBuy} ; this.state == ${this.state})`,
+          life: 2000,
+        });
       }
     },
     blockui(value) {

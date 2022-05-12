@@ -11,21 +11,23 @@
 Если Вы используете операционную систему Linux, то для установки зависимостей потребуется всего лишь иметь Advanced Packaging Tool (APT). Проверить, установлен ли пакетный менеждер можно, введя команду `apt update`. Затем можно будет выполнить команду в терминале
 
 С использованием root:
+
 ```sh
-echo "Installing dependencies..." && sudo apt install python3 nodejs-lts && sudo npm --global install yarn && pip3 install uvicorn fastapi && cd frontend && yarn && cd .. && echo "Depedencies has been installed/updated!" 
+echo "Installing dependencies..." && sudo apt install python3 nodejs-lts && sudo npm --global install yarn && pip3 install uvicorn fastapi && cd frontend && yarn && cd .. && echo "Depedencies has been installed/updated!"
 ```
 
 Без использования root (зачастую этот вариант требуется для Termux):
+
 ```sh
-echo "Installing dependencies..." && apt install python3 nodejs-lts && npm --global install yarn && pip3 install uvicorn fastapi && cd frontend && yarn && cd .. && echo "Depedencies has been installed/updated!" 
+echo "Installing dependencies..." && apt install python3 nodejs-lts && npm --global install yarn && pip3 install uvicorn fastapi && cd frontend && yarn && cd .. && echo "Depedencies has been installed/updated!"
 ```
 
 ### Для Windows
 
 Для установки зависимостей, Вам потребуется установить такие утилиты, как:
 
-- NodeJS (https://nodejs.org/en/download/) 
-- Python 3.10 or later (https://www.python.org/downloads/)
+- NodeJS (https://nodejs.org/en/download/)
+- Python 3.8 or later (https://www.python.org/downloads/)
 
 Затем, необходимо будет установить дополнтельные пакеты в Windows Powershell:
 

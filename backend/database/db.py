@@ -173,11 +173,11 @@ class Database:
                 {Film.Column.IMAGE.value} = ?,
                 {Film.Column.GENRES.value} = ?,
                 {Film.Column.DATE.value} = ?,
-                {Film.Column.TIME.value} = ?,
+                {Film.Column.TIME.value} = ?
                 where {Film.Column.ID.value} = ?''',
             (
                 film.name, film.description, film.places, film.price,
-                film.image, ' '.join(film.genres), film.date, film.time
+                film.image, ' '.join(film.genres), film.date, film.time, film.film_id
             )
         )
         self.connection.commit()
@@ -194,12 +194,12 @@ class Database:
                 {User.Column.LOGIN.value} = ?,
                 {User.Column.PASSWORD.value} = ?,
                 {User.Column.DISCOUNT.value} = ?,
-                {User.Column.ROLE.value} = ?
-                {User.Column.TICKETS} = ?
+                {User.Column.ROLE.value} = ?,
+                {User.Column.TICKETS.value} = ?
                 where {User.Column.ID.value} = ?''',
             (
                 user.login, user.password, user.discount,
-                user.role.value, user.user_id, dumps(user.tickets)
+                user.role.value, dumps(user.tickets), user.user_id
             )
         )
         self.connection.commit()

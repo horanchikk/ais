@@ -25,7 +25,7 @@ SUCCESS = {'response': 'success'}
 
 
 @users_router.post('/login')
-async def users_get(
+async def users_login(
         model: LoginModel
 ):
     """Проверяет правильность логина и пароля
@@ -51,7 +51,7 @@ async def users_get(
 
 
 @users_router.get('/getall')
-async def users_get(limit: int = 0):
+async def users_get_all(limit: int = 0):
     """Возвращает список всех пользователей"""
     users = db.get_all_users(limit)
     return {'response': [user.json() for user in users]}
@@ -106,7 +106,7 @@ async def film_buy(
         film.places -= 1
         user.tickets.append(film_id)
         db.save_film(film)
-        db.save_user(film)
+        db.save_user(user)
         return {'response': {
             'user_id': user_id,
             'film_id': film_id

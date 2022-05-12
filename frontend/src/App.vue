@@ -116,6 +116,7 @@ export default {
       username: null,
       password: null,
       errorText: null,
+      userType: null,
       displayState: false,
     };
   },
@@ -138,44 +139,38 @@ export default {
       this.userid = null;
     },
     async login(mode) {
+      let severity = "success";
+      let summary = "";
+
       if (mode == "login") {
         let req = await cinemaApi.login(this.username, this.password);
-
         if (req["status"] == 400) {
           if (req["detail"]["code"] == 1) {
-            this.errorText = req["detail"]["message"];
-            this.$toast.add({
-              severity: "error",
-              summary: this.errorText,
-              life: 2000,
-            });
             this.userid = null;
-            this.errorText = null;
+            this.errorText = req["detail"]["message"];
+            severity = "error";
+            summary = this.errorText;
           }
         } else {
-          this.userid = this.username;
+          this.userid = req["response"]["id"];
+          this.userType = req["response"][""];
           this.displayState = false;
-          this.$toast.add({
-            severity: "success",
-            summary: "Вы были авторизованы!",
-            life: 2000,
-          });
+          summary = "Вы были авторизованы!";
         }
       } else if (mode == "reg") {
-        await cinemaApi.reg(this.username, this.password);
-        this.userid = this.username;
+        let req = await cinemaApi.reg(this.username, this.password);
         this.displayState = false;
-        this.$toast.add({
-          severity: "success",
-          summary: "Вы были зарегистрированы",
-          life: 2000,
-        });
+        this.userid = req["response"]["id"];
+        summary = "Вы были зарегистрированы";
       } else if (mode == "logout") {
         this.userid = null;
         this.displayState = false;
+        summary = "Вы вышли из аккаунта";
+      }
+      if (summary != "") {
         this.$toast.add({
-          severity: "success",
-          summary: "Вы вышли из аккаунта",
+          severity: severity,
+          summary: summary,
           life: 2000,
         });
       }
