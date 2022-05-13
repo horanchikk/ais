@@ -1,5 +1,25 @@
 <template>
   <div class="flex flex-col w-screen h-screen bg-gray-900">
+    <Sidebar v-model:visible="showTickets">
+      <template #header>
+        <h3>Список купленных билетов</h3>
+      </template>
+      <div class="h-full">
+        <div
+          v-for="film in userTicketsName"
+          :key="film"
+          class="flex flex-col justify-center items-center py-5"
+        >
+          <QrcodeVue
+            :value="`http://localhost:3000/#?checkticket=true&user=${this.$root.$data.userid}&film=${film.id}`"
+            :size="230"
+            :background="'#1f1f1f'"
+            :foreground="'#fff'"
+          ></QrcodeVue>
+          <h1>{{ film.name }}</h1>
+        </div>
+      </div>
+    </Sidebar>
     <Toast position="top-left" />
     <header class="text-white bg-gray-600">
       <div class="flex justify-between w-screen">
@@ -9,12 +29,19 @@
           <router-link to="/"> AIS </router-link>
         </div>
         <div class="flex p-3 gap-3">
-          <Button
-            v-if="userid != null"
-            :label="`Авторизирован под ${this.username}`"
-            class="p-button-raised p-button-success p-button-text"
-            @click="showState(1)"
-          />
+          <div v-if="userid != null" class="flex gap-4">
+            <Button
+              :label="`Авторизирован под ${this.username}`"
+              class="p-button-raised p-button-success p-button-text"
+              @click="showState(1)"
+            />
+            <Button
+              :label="`Список билетов [${this.userTickets.length}]`"
+              class="p-button-raised p-button-help p-button-text"
+              @click="showTickets = true"
+            />
+          </div>
+
           <div v-else class="flex gap-3">
             <Button
               label="Войти на сайт"
@@ -108,17 +135,29 @@ import Password from "primevue/password";
 import InputText from "primevue/inputtext";
 import Toast from "primevue/toast";
 import cinemaApi from "./mixins/cinemaApi";
+import QrcodeVue from "qrcode.vue";
+import base64 from "base-64";
 
 export default {
   data() {
     return {
-      state: 0,
+      // horanchikk_test1 helloworld
+      // Данные вошедшего пользователя
       userid: null,
+      userType: null,
+      userTickets: [],
+      userTicketsName: [],
+      // Данные при авторизации/регистрации
       username: null,
       password: null,
-      errorText: null,
-      userType: null,
+      // Стэйты
+      state: 0,
+      showTickets: false,
       displayState: false,
+      // Обработка ошибок
+      errorText: null,
+      // Отладка
+      debug: false,
     };
   },
   components: {
@@ -128,9 +167,23 @@ export default {
     InputText,
     Toast,
     Sidebar,
+    QrcodeVue,
   },
   mixins: [CinemaAPI],
   methods: {
+    encode(text) {
+      console.log(`encoded: ${text}`);
+      return base64.encode(text);
+    },
+    async debug(msg) {
+      if (this.$root.$data.debug == true) {
+        this.$toast.add({
+          severity: "info",
+          summary: `debug: ${msg}`,
+          life: 1500,
+        });
+      }
+    },
     showState(state) {
       this.displayState = true;
       this.state = state;
@@ -138,6 +191,23 @@ export default {
     logout() {
       this.displayState = false;
       this.userid = null;
+    },
+    async updTicketsList() {
+      let req = await CinemaAPI.login(
+        this.$root.$data.username,
+        this.$root.$data.password
+      );
+      this.$root.$data.userTickets = [];
+      this.$root.$data.userTicketsName = [];
+      for (const i in req["response"]["tickets"]) {
+        let res = await CinemaAPI.getFilmById(req["response"]["tickets"][i]);
+        this.$root.$data.userTickets.push(req["response"]["tickets"][i]);
+        let a = {
+          name: `${res["response"]["name"]}`,
+          id: `${res["response"]["name"]}`,
+        };
+        this.$root.$data.userTicketsName.push(a);
+      }
     },
     async login(mode) {
       let severity = "success";
@@ -154,15 +224,25 @@ export default {
           }
         } else {
           this.userid = req["response"]["id"];
-          this.userType = req["response"][""];
+          this.userType = req["response"]["role"];
+          this.updTicketsList();
+          this.debug("list updated");
           this.displayState = false;
           summary = "Вы были авторизованы!";
         }
       } else if (mode == "reg") {
         let req = await cinemaApi.reg(this.username, this.password);
-        this.displayState = false;
-        this.userid = req["response"]["id"];
-        summary = "Вы были зарегистрированы";
+        if (req["status"] == 400) {
+          this.userid = null;
+          this.errorText = req["detail"]["message"];
+          severity = "error";
+          summary = this.errorText;
+        } else {
+          this.userid = req["response"]["id"];
+          this.userType = req["response"][""];
+          this.displayState = false;
+          summary = "Вы были зарегистрированы";
+        }
       } else if (mode == "logout") {
         this.userid = null;
         this.displayState = false;

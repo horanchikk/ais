@@ -1,3 +1,5 @@
+import Toast from "primevue/toast";
+import ToastService from "primevue/toastservice";
 const API_URL = "http://localhost:8000/";
 
 async function sendGET(url) {
@@ -51,6 +53,9 @@ export default {
   },
   /**
    * Покупка билета
+   * @param {int} film_id уникальный идентификатор фильма.
+   * @param {int} user_id уникальный идентификатор пользователя.
+   * @param {int} date дата, только в unix.
    */
   async buyTicket(film_id, user_id, date) {
     return await sendGET(

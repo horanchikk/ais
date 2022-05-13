@@ -1,8 +1,5 @@
 <template>
   <div class="h-full w-full text-white">
-    <Sidebar v-model:visible="showTickets">
-      <h3>Тестирование showTickets</h3>
-    </Sidebar>
     <div class="overflow-scroll">
       <div v-for="film in films" :key="film">
         <div :class="this.blockui('filmblock')">
@@ -56,8 +53,8 @@
           </div>
         </div>
       </div>
-      <div class="w-full text-center text-gray-600">
-        We stand with <img src="." alt="" /> ukraine
+      <div class="w-full text-center text-gray-600 py-3">
+        We stand with 💙💛
       </div>
     </div>
 
@@ -68,9 +65,6 @@
             Покупка билета на фильм "{{ this.filmdata.name }}"
           </h1>
           <br />
-        </div>
-        <div v-if="state == 2">
-          Билет успешно куплен, QR-код сохранён в личном кабинете.
         </div>
       </template>
 
@@ -90,7 +84,7 @@
           <QrcodeVue
             :value="
               encode(
-                `http://localhost:3000/#?checkticket=true&user=2&film=${this.filmdata.filmid}`
+                `http://localhost:3000/#?checkticket=true&user=${this.$root.$data.userid}&film=${this.filmdata.filmid}`
               )
             "
             :size="300"
@@ -128,7 +122,6 @@ import Button from "primevue/button";
 import Calendar from "primevue/calendar";
 import InputText from "primevue/inputtext";
 import Dialog from "primevue/dialog";
-import Sidebar from "primevue/sidebar";
 
 // Миксины для работы с жанрами и API
 import Genre from "../mixins/genre.js";
@@ -142,7 +135,6 @@ export default {
   data() {
     return {
       displayBuy: false,
-      showTickets: true,
       filmName: "TestFilm",
       selectedDate: null,
       mobileUI: false,
@@ -157,10 +149,31 @@ export default {
     InputText,
     Dialog,
     QrcodeVue,
-    Sidebar,
   },
   mixins: [Genre, CinemaAPI],
   methods: {
+    async debug(msg) {
+      if (this.$root.$data.debug == true) {
+        this.$toast.add({
+          severity: "info",
+          summary: `debug: ${msg}`,
+          life: 1500,
+        });
+      }
+    },
+    async updTicketsList() {
+      let req = await CinemaAPI.login(
+        this.$root.$data.username,
+        this.$root.$data.password
+      );
+      this.$root.$data.userTickets = [];
+      this.$root.$data.userTicketsName = [];
+      for (const i in req["response"]["tickets"]) {
+        let res = await CinemaAPI.getFilmById(req["response"]["tickets"][i]);
+        this.$root.$data.userTickets.push(req["response"]["tickets"][i]);
+        this.$root.$data.userTicketsName.push(res["response"]["name"]);
+      }
+    },
     async buyTicket(filmName, filmId) {
       this.filmdata = {
         name: filmName,
@@ -170,7 +183,6 @@ export default {
       this.displayBuy = true;
     },
     async showQr() {
-      this.state = 2;
       if (this.displayBuy) {
         const date = Date.parse(this.selectedDate);
         const req = await CinemaAPI.buyTicket(
@@ -178,13 +190,21 @@ export default {
           this.$root.$data.userid,
           date
         );
-        console.log(req["response"]);
-      } else {
+        this.state = 2;
         this.$toast.add({
-          severity: "error",
-          summary: `Ошибка покупки билета (this.displayBuy == ${this.displayBuy} ; this.state == ${this.state})`,
-          life: 2000,
+          severity: "success",
+          summary: "Билет успешно куплен, QR-код сохранён в личном кабинете",
+          life: 4500,
         });
+        this.updTicketsList();
+        this.debug(req["response"]);
+      } else {
+        this.displayBuy = true;
+        // Фикс ре-рендера и уведомление об этом пользователя
+        this.debug(
+          `re-render fixed (this.displayBuy == ${this.displayBuy} ; this.state == ${this.state})`
+        );
+        this.showQr();
       }
     },
     blockui(value) {
@@ -207,6 +227,7 @@ export default {
       this.$root.$data.state = 0;
     },
     encode(text) {
+      console.log(`encoded: ${text}`);
       return base64.encode(text);
     },
     async fetchFilms() {
@@ -214,12 +235,38 @@ export default {
       req["response"].forEach((e) => {
         this.films.push(e);
       });
-      console.log(this.films);
+      this.debug(`Films count: ${this.films.length}`);
     },
   },
-  mounted() {
+  beforeMount() {
     this.fetchFilms();
     window.innerWidth < 600 ? (this.mobileUI = true) : (this.mobileUI = false);
+  },
+  updated() {
+    this.debug(`re-render`);
+    // Меню кассира
+    if (this.$route.query.checkticket == "true") {
+      // если в запросе есть checkticket
+      if (this.$root.$data.userType == "admin") {
+        // и авторизированный пользовать == admin
+        if (this.$route.query.user != "" && this.$route.query.film != "") {
+          // то проверем запрос на наличие пустых строк
+          this.$toast.add({
+            severity: "info",
+            summary: `Запрос принят. У пользователя под никнеймом ${this.$route.query.user} найден билет на фильм ${this.$route.query.film}.`,
+            life: 4500,
+          });
+          // и отправляем кассиру ответ, что запрос подлинный
+        }
+      } else {
+        this.$toast.add({
+          severity: "error",
+          summary: "У вас нет доступа к меню кассира.",
+          life: 4500,
+        });
+        // если авторизированный пользователь не admin, то выводим данное сообщение
+      }
+    }
   },
 };
 </script>
