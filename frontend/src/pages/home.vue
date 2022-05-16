@@ -153,7 +153,7 @@ export default {
   mixins: [Genre, CinemaAPI],
   methods: {
     async debug(msg) {
-      if (this.$root.$data.debug == true) {
+      if (this.$root.$data.debugging == true) {
         this.$toast.add({
           severity: "info",
           summary: `debug: ${msg}`,
@@ -222,6 +222,16 @@ export default {
         }
       }
     },
+    async userGET() {
+      return await CinemaApi.getUserById(this.$route.query.user)["response"][
+        "login"
+      ];
+    },
+    async filmGET() {
+      return await CinemaApi.getFilmById(this.$route.query.film)["response"][
+        "name"
+      ];
+    },
     callLogin() {
       this.$root.$data.displayState = true;
       this.$root.$data.state = 0;
@@ -253,9 +263,10 @@ export default {
           // то проверем запрос на наличие пустых строк
           this.$toast.add({
             severity: "info",
-            summary: `Запрос принят. У пользователя под никнеймом ${this.$route.query.user} найден билет на фильм ${this.$route.query.film}.`,
+            summary: `Запрос принят. У пользователя под никнеймом ${this.userGET()} найден билет на фильм ${this.filmGET()}.`,
             life: 4500,
           });
+          console.log(filmGET());
           // и отправляем кассиру ответ, что запрос подлинный
         }
       } else {

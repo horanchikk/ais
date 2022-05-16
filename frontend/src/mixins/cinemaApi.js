@@ -3,7 +3,12 @@ import ToastService from "primevue/toastservice";
 const API_URL = "http://localhost:8000/";
 
 async function sendGET(url) {
-  const req = await fetch(url);
+  const req = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+    },
+  });
   const result = await req.json();
   result["status"] = req.status;
   return result;

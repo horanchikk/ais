@@ -157,7 +157,7 @@ export default {
       // Обработка ошибок
       errorText: null,
       // Отладка
-      debug: false,
+      debugging: false,
     };
   },
   components: {
@@ -175,8 +175,8 @@ export default {
       console.log(`encoded: ${text}`);
       return base64.encode(text);
     },
-    async debug(msg) {
-      if (this.$root.$data.debug == true) {
+    debug(msg) {
+      if (this.$root.$data.debugging == true) {
         this.$toast.add({
           severity: "info",
           summary: `debug: ${msg}`,
