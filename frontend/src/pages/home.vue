@@ -137,7 +137,6 @@ export default {
       displayBuy: false,
       filmName: "TestFilm",
       selectedDate: null,
-      mobileUI: false,
       filmdata: null,
       state: 1,
       films: [],
@@ -166,6 +165,8 @@ export default {
         this.$root.$data.username,
         this.$root.$data.password
       );
+      this.debug(this.$root.$data.username);
+      this.debug(this.$root.$data.password);
       this.$root.$data.userTickets = [];
       this.$root.$data.userTicketsName = [];
       for (const i in req["response"]["tickets"]) {
@@ -208,7 +209,7 @@ export default {
       }
     },
     blockui(value) {
-      if (this.mobileUI) {
+      if (this.$root.$data.mobileUI) {
         if (value === "filmblock") {
           return "flex gap-5 p-4 mx-2 my-5 bg-gray-700 rounded-lg";
         } else if (value === "filmdesc") {
@@ -223,12 +224,12 @@ export default {
       }
     },
     async userGET() {
-      return await CinemaApi.getUserById(this.$route.query.user)["response"][
+      return await CinemaAPI.getUserById(this.$route.query.user)["response"][
         "login"
       ];
     },
     async filmGET() {
-      return await CinemaApi.getFilmById(this.$route.query.film)["response"][
+      return await CinemaAPI.getFilmById(this.$route.query.film)["response"][
         "name"
       ];
     },
@@ -237,7 +238,6 @@ export default {
       this.$root.$data.state = 0;
     },
     encode(text) {
-      console.log(`encoded: ${text}`);
       return base64.encode(text);
     },
     async fetchFilms() {
@@ -251,33 +251,6 @@ export default {
   beforeMount() {
     this.fetchFilms();
     window.innerWidth < 600 ? (this.mobileUI = true) : (this.mobileUI = false);
-  },
-  updated() {
-    this.debug(`re-render`);
-    // Меню кассира
-    if (this.$route.query.checkticket == "true") {
-      // если в запросе есть checkticket
-      if (this.$root.$data.userType == "admin") {
-        // и авторизированный пользовать == admin
-        if (this.$route.query.user != "" && this.$route.query.film != "") {
-          // то проверем запрос на наличие пустых строк
-          this.$toast.add({
-            severity: "info",
-            summary: `Запрос принят. У пользователя под никнеймом ${this.userGET()} найден билет на фильм ${this.filmGET()}.`,
-            life: 4500,
-          });
-          console.log(filmGET());
-          // и отправляем кассиру ответ, что запрос подлинный
-        }
-      } else {
-        this.$toast.add({
-          severity: "error",
-          summary: "У вас нет доступа к меню кассира.",
-          life: 4500,
-        });
-        // если авторизированный пользователь не admin, то выводим данное сообщение
-      }
-    }
   },
 };
 </script>
