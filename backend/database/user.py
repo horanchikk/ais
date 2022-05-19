@@ -45,6 +45,7 @@ class User:
         return f'[{self.user_id}] {self.login}, {self.role}'
 
     def json(self) -> Dict[str, Any]:
+        """Переводит объект в JSON"""
         return {
             'id': self.user_id,
             'role': self.role.value,

@@ -13,3 +13,9 @@ class RegisterModel(BaseModel):
 class LoginModel(BaseModel):
     login: str
     password: str
+
+
+class DeleteTicketModel(BaseModel):
+    film_id: int
+    login: str
+    password: str

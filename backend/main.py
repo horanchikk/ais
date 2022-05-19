@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Database, User
-from models import RegisterModel, LoginModel, FilmEditModel
+from models import RegisterModel, LoginModel, FilmEditModel, DeleteTicketModel
 from errors import Error
 from config import ADMIN_TOKEN
 
@@ -58,7 +58,7 @@ async def users_get_all(limit: int = 0):
 
 
 @users_router.post('/reg')
-async def asd(
+async def register(
         model: RegisterModel
 ):
     """Регистрирует нового пользователя
@@ -73,6 +73,29 @@ async def asd(
         model.login, model.password, model.role, model.discount
     )
     return {'response': user.json()}
+
+
+@users_router.post('/sell_ticket')
+async def sell_ticket(
+    model: DeleteTicketModel
+):
+    """Продает билет у пользователя.
+    Необходима авторизация.
+    
+    :param model: модель продажи билета."""
+    user = db.get_user_by(User.Column.LOGIN, model.login)
+    if not user:
+        return Error.USER_NOT_EXISTS
+    if user.password != model.password:
+        return Error.INVALID_PASS_LOGIN
+    film = db.get_film(model.film_id)
+    if not film:
+        return Error.FILM_NOT_EXISTS
+    film.places += 1
+    user.tickets.remove(model.film_id)
+    db.save_film(film)
+    db.save_user(user)
+    return SUCCESS
 
 
 # ---=== Films ===--- #

@@ -88,8 +88,8 @@
               )
             "
             :size="300"
-            :background="'#1f1f1f'"
-            :foreground="'#fff'"
+            :background="'#fff'"
+            :foreground="'#000'"
             :level="'L'"
           ></QrcodeVue>
         </div>

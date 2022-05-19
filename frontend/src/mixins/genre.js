@@ -1,11 +1,5 @@
 /**
- * danger - красный
- * primary - серый
- * warning - желтый
- * secondary - розовый
- * success - зеленый
- * info - синий
- * help - фиолетовый
+ * Цвета жанров
  */
 const genres = {
   ужасы: "border-rose-700",

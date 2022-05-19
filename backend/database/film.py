@@ -38,6 +38,7 @@ class Film:
         return f'[{self.film_id}] {self.name} {self.places} places'
 
     def json(self) -> Dict[str, Any]:
+        """Переводит объект в JSON"""
         return {
             'id': self.film_id,
             'name': self.name,

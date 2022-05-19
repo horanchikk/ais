@@ -12,10 +12,16 @@
           class="flex flex-col justify-center items-center py-5"
         >
           <QrcodeVue
-            :value="`http://localhost:3000/#?checkticket=true&user=${this.userid}&film=${film.id}`"
-            :size="230"
-            :background="'#1f1f1f'"
-            :foreground="'#fff'"
+            :value="`${encode(
+              'http://localhost:3000/#?checkticket=true&user=' +
+                this.userid +
+                '&film=' +
+                film.id
+            )}`"
+            :size="300"
+            :background="'#fff'"
+            :foreground="'#000000'"
+            :level="'L'"
           ></QrcodeVue>
           <h1>{{ film.name }}</h1>
         </div>
@@ -37,25 +43,25 @@
           <div v-if="userid != null" class="flex gap-4">
             <Button
               :label="`Авторизирован под ${this.username}`"
-              class="p-button-raised p-button-success p-button-text"
+              class="p-button-raised p-button-success"
               @click="showState(1)"
             />
             <Button
               :label="`Список билетов [${this.userTickets.length}]`"
-              class="p-button-raised p-button-help p-button-text"
+              class="p-button-raised p-button-help"
               @click="showTickets = true"
             />
             <Button
               v-if="this.userType == 'admin'"
               :label="'Проверка билетов'"
-              class="p-button-raised p-button-warning p-button-text"
+              class="p-button-raised p-button-primary"
               @click="scanTickets('start')"
             />
           </div>
           <div v-else class="flex gap-3">
             <Button
               label="Войти на сайт"
-              class="p-button-raised p-button-warning p-button-text"
+              class="p-button-raised p-button-warning"
               @click="showState(0)"
             />
           </div>
@@ -100,11 +106,13 @@
         <div class="flex justify-center w-full" v-else-if="state == 1">
           <h1>Вы уверены, что хотите выйти?</h1>
         </div>
-        <div class="flex justify-center w-full" v-else-if="state == 99">
-          <!-- <video id="qrvideo" class="rounded-s shadow-m"></video> -->
-          <div class="flex justify-center items-center w-60 h-60">
-            здесь будет видео
-          </div>
+        <div class="flex flex-col w-full" v-else-if="state == 99">
+          <qrcode-stream
+            @decode="onDecode"
+            :track="paintOutline"
+            @init="logErrors"
+          ></qrcode-stream>
+          <p>Decoded: {{ this.decoded }}</p>
         </div>
       </div>
 
@@ -174,7 +182,7 @@ import cinemaApi from "./mixins/cinemaApi";
 // Сторонние библиотеки
 
 import QrcodeVue from "qrcode.vue";
-import QrScanner from "qr-scanner";
+import { QrcodeStream } from "qrcode-reader-vue3";
 
 import base64 from "base-64";
 import Cookies from "js-cookie";
@@ -182,7 +190,6 @@ import Cookies from "js-cookie";
 export default {
   data() {
     return {
-      // horanchikk_test1 helloworld
       // Данные вошедшего пользователя
       userid: null,
       userType: null,
@@ -198,8 +205,9 @@ export default {
       // Обработка ошибок
       errorText: null,
       // Отладка
-      debugging: true,
+      debugging: false,
       mobileUI: false,
+      decoded: "",
     };
   },
   components: {
@@ -210,12 +218,20 @@ export default {
     Toast,
     Sidebar,
     QrcodeVue,
+    QrcodeStream,
   },
   mixins: [CinemaAPI],
   methods: {
+    onDecode(decodedString) {
+      window.open(base64.decode(decodedString));
+    },
     encode(text) {
       return base64.encode(text);
     },
+    /**
+     * Отображение отладочного сообщения
+     * @param {string} msg сообщение для отладки
+     */
     debug(msg) {
       if (this.debugging == true) {
         this.$toast.add({
@@ -239,9 +255,15 @@ export default {
         "name"
       ];
     },
+    /**
+     * Выход из аккаунта.
+     */
     logout() {
       this.displayState = false;
       this.userid = null;
+    },
+    logErrors(promise) {
+      promise.catch(console.error);
     },
     async updTicketsList(usr, passwd) {
       let req = await CinemaAPI.login(usr, passwd);
@@ -252,7 +274,7 @@ export default {
         this.userTickets.push(req["response"]["tickets"][i]);
         let a = {
           name: `${res["response"]["name"]}`,
-          id: `${res["response"]["name"]}`,
+          id: `${res["response"]["id"]}`,
         };
         this.userTicketsName.push(a);
       }
@@ -320,6 +342,26 @@ export default {
         });
       }
     },
+    paintOutline(detectedCodes, ctx) {
+      for (const detectedCode of detectedCodes) {
+        const [firstPoint, ...otherPoints] = detectedCode.cornerPoints;
+
+        ctx.strokeStyle = "green";
+        ctx.lineWidth = 10;
+        ctx.fillStyle = "#111111";
+
+        ctx.beginPath();
+        ctx.moveTo(firstPoint.x, firstPoint.y);
+        for (const { x, y } of otherPoints) {
+          ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(firstPoint.x, firstPoint.y);
+
+        ctx.closePath();
+        ctx.stroke();
+      }
+    },
     async checkTicket() {
       // Меню кассира
       if (this.$route.query.checkticket == "true") {
@@ -352,14 +394,8 @@ export default {
         this.state == 99;
         if (mode == "stop") {
           this.displayState = false;
-          qrScanner.stop();
         } else if (mode == "start") {
           this.showState(99);
-          const qrScanner = new QrScanner(
-            document.getElementById("qrvideo"),
-            (result) => console.log("decoded qr code:", result)
-          );
-          qrScanner.start();
         }
       } else {
         this.$toast.add({
@@ -375,6 +411,8 @@ export default {
       this.login("login", Cookies.get("login"), Cookies.get("password"));
       this.debug(`Logging as ${Cookies.get("login")} using cookie`);
     }
+  },
+  updated() {
     this.checkTicket();
   },
 };
