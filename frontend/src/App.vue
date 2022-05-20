@@ -372,9 +372,14 @@ export default {
             // то проверем запрос на наличие пустых строк
             this.$toast.add({
               severity: "info",
-              summary: `Запрос принят. У пользователя под никнеймом ${this.userGET()} найден билет на фильм ${this.filmGET()}.`,
+              summary: `Запрос принят. У пользователя под никнеймом ${this.userGET(
+                this.$route.query.user
+              )} найден билет на фильм ${this.filmGET(
+                this.$route.query.film
+              )}.`,
               life: 4500,
             });
+            cinemaApi.sellTicket(this.$route.query.film);
             this.debug("checkticket is working");
             console.log(this.filmGET());
             // и отправляем кассиру ответ, что запрос подлинный
