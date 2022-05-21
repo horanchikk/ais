@@ -7,7 +7,7 @@
       </template>
       <div class="h-full">
         <div
-          v-for="film in userTicketsName"
+          v-for="film in userTickets"
           :key="film"
           class="flex flex-col justify-center items-center py-5"
         >
@@ -114,6 +114,12 @@
           ></qrcode-stream>
           <p>Decoded: {{ this.decoded }}</p>
         </div>
+        <div class="flex flex-col w-full" v-else-if="state == 90">
+          <p>Покупатель: {{ this.buyerName }}</p>
+          <p>Фильм: {{ this.buyerFilm }}</p>
+          <br />
+          <p class="text-green-500 text-center">Билет валиден.</p>
+        </div>
       </div>
 
       <template #footer>
@@ -161,6 +167,13 @@
             @click="scanTickets('stop')"
           />
         </div>
+        <div class="flex w-full justify-center" v-else-if="state == 90">
+          <Button
+            :label="'Закрыть'"
+            icon="pi pi-times"
+            @click="closeTicket()"
+          />
+        </div>
       </template>
     </Dialog>
   </div>
@@ -171,7 +184,6 @@
 import Sidebar from "primevue/sidebar";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
-import CinemaAPI from "/src/mixins/cinemaApi.js";
 import Password from "primevue/password";
 import InputText from "primevue/inputtext";
 import Toast from "primevue/toast";
@@ -194,10 +206,15 @@ export default {
       userid: null,
       userType: null,
       userTickets: [],
-      userTicketsName: [],
+
       // Данные при авторизации/регистрации
       username: null,
       password: null,
+
+      // Данные купившего билеты пользователя
+      buyerName: "",
+      buyerFilm: "",
+
       // Стэйты
       state: 0,
       showTickets: false,
@@ -220,11 +237,8 @@ export default {
     QrcodeVue,
     QrcodeStream,
   },
-  mixins: [CinemaAPI],
+  mixins: [cinemaApi],
   methods: {
-    onDecode(decodedString) {
-      window.open(base64.decode(decodedString));
-    },
     encode(text) {
       return base64.encode(text);
     },
@@ -246,14 +260,14 @@ export default {
       this.state = state;
     },
     async userGET() {
-      return await CinemaAPI.getUserById(this.$route.query.user)["response"][
-        "login"
-      ];
+      let req = await cinemaApi.getUserById(this.$route.query.user);
+      this.buyerName = await req["response"]["login"];
+      return await req["response"]["login"];
     },
     async filmGET() {
-      return await CinemaAPI.getFilmById(this.$route.query.film)["response"][
-        "name"
-      ];
+      let req = await cinemaApi.getFilmById(this.$route.query.film);
+      this.buyerFilm = await req["response"]["name"];
+      return await req["response"]["name"];
     },
     /**
      * Выход из аккаунта.
@@ -266,17 +280,15 @@ export default {
       promise.catch(console.error);
     },
     async updTicketsList(usr, passwd) {
-      let req = await CinemaAPI.login(usr, passwd);
+      let req = await cinemaApi.login(usr, passwd);
       this.userTickets = [];
-      this.userTicketsName = [];
       for (const i in req["response"]["tickets"]) {
-        let res = await CinemaAPI.getFilmById(req["response"]["tickets"][i]);
-        this.userTickets.push(req["response"]["tickets"][i]);
+        let res = await cinemaApi.getFilmById(req["response"]["tickets"][i]);
         let a = {
           name: `${res["response"]["name"]}`,
           id: `${res["response"]["id"]}`,
         };
-        this.userTicketsName.push(a);
+        this.userTickets.push(a);
       }
     },
     async login(mode, usr, passwd) {
@@ -323,6 +335,7 @@ export default {
         } else {
           this.userid = req["response"]["id"];
           this.userType = req["response"]["role"];
+          this.updTicketsList(usr, passwd);
           this.displayState = false;
           summary = "Вы были зарегистрированы";
         }
@@ -370,19 +383,14 @@ export default {
           // и авторизированный пользовать == admin
           if (this.$route.query.user != "" && this.$route.query.film != "") {
             // то проверем запрос на наличие пустых строк
-            this.$toast.add({
-              severity: "info",
-              summary: `Запрос принят. У пользователя под никнеймом ${this.userGET(
-                this.$route.query.user
-              )} найден билет на фильм ${this.filmGET(
-                this.$route.query.film
-              )}.`,
-              life: 4500,
-            });
-            cinemaApi.sellTicket(this.$route.query.film);
+            this.state = 90;
+            this.displayState = true;
+            document.title = "Окно кассира";
+            // вызываем окно для кассира
+            await this.filmGET(this.$route.query.film);
+            await this.userGET(this.$route.query.user);
+            // берём данные пользователя. фильма и рендерим в окно
             this.debug("checkticket is working");
-            console.log(this.filmGET());
-            // и отправляем кассиру ответ, что запрос подлинный
           }
         } else {
           this.$toast.add({
@@ -409,6 +417,13 @@ export default {
           life: 4500,
         });
       }
+    },
+    closeTicket() {
+      window.close();
+    },
+    onDecode(decodedString) {
+      window.open(base64.decode(decodedString), "checkTicket");
+      this.scanTickets("stop");
     },
   },
   mounted() {

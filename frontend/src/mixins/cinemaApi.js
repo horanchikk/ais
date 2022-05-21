@@ -72,7 +72,7 @@ export default {
     );
   },
   /**
-   * Продажа билета
+   * TODO: Продажа билета
    * @param {int} film_id уникальный идентификатор фильма
    * @param {string} login логин пользователя
    * @param {string} password пароль пользователя

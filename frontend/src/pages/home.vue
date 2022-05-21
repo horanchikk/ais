@@ -166,13 +166,14 @@ export default {
         this.$root.$data.password
       );
       this.debug(this.$root.$data.username);
-      this.debug(this.$root.$data.password);
       this.$root.$data.userTickets = [];
-      this.$root.$data.userTicketsName = [];
-      for (const i in req["response"]["tickets"]) {
+      for (let i in req["response"]["tickets"]) {
         let res = await CinemaAPI.getFilmById(req["response"]["tickets"][i]);
-        this.$root.$data.userTickets.push(req["response"]["tickets"][i]);
-        this.$root.$data.userTicketsName.push(res["response"]["name"]);
+        let a = {
+          name: `${res["response"]["name"]}`,
+          id: `${res["response"]["id"]}`,
+        };
+        this.$root.$data.userTickets.push(a);
       }
     },
     async buyTicket(filmName, filmId) {
@@ -222,16 +223,6 @@ export default {
           return "text-2xl";
         }
       }
-    },
-    async userGET() {
-      return await CinemaAPI.getUserById(this.$route.query.user)["response"][
-        "login"
-      ];
-    },
-    async filmGET() {
-      return await CinemaAPI.getFilmById(this.$route.query.film)["response"][
-        "name"
-      ];
     },
     callLogin() {
       this.$root.$data.displayState = true;
